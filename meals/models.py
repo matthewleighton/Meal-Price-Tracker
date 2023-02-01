@@ -27,8 +27,8 @@ class FoodPriceRecord(models.Model):
 	
 	quantity = models.DecimalField('Quantity',
 								   max_digits=6,
-								   decimal_places=2
-								)
+								   decimal_places=2)
+
 	unit = models.CharField('Unit',
 							max_length=20,
 							validators=[MealValidators.is_valid_unit])
@@ -41,3 +41,19 @@ class FoodPriceRecord(models.Model):
 	currency = models.CharField('Currency', 
 								max_length=3, 
 								validators=[MealValidators.is_valid_currency])
+
+
+class StandardIngredient(models.Model):
+	meal = models.ForeignKey(Meal,
+							 on_delete=models.CASCADE)
+	
+	food_item = models.ForeignKey(FoodItem,
+								  on_delete=models.CASCADE)
+	
+	quantity = models.DecimalField('Quantity',
+								   max_digits=6,
+								   decimal_places=2)
+
+	unit = models.CharField('Unit',
+							max_length=20,
+							validators=[MealValidators.is_valid_unit])
