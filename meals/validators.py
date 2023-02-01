@@ -20,3 +20,8 @@ class MealValidators():
 		valid_currencies = ['EUR', 'GBP']
 
 		return True if value in valid_currencies else False
+
+	def is_valid_rating(rating):
+		valid_ratings = [0.5 * i for i in range(1, 11)]
+
+		return True if rating in valid_ratings else False

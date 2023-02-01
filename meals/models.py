@@ -57,3 +57,11 @@ class StandardIngredient(models.Model):
 	unit = models.CharField('Unit',
 							max_length=20,
 							validators=[MealValidators.is_valid_unit])
+
+class MealInstance(models.Model):
+	meal = models.ForeignKey(Meal,
+							 on_delete=models.CASCADE)
+	date = models.DateField('Date')
+	num_servings = models.PositiveIntegerField('Number of Servings')
+	rating = models.PositiveIntegerField('Rating', validators=[MealValidators.is_valid_rating])
+	cook_time = models.PositiveIntegerField('Cooking Time')
