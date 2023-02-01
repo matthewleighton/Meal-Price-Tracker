@@ -42,6 +42,9 @@ class FoodPriceRecord(models.Model):
 								max_length=3, 
 								validators=[MealValidators.is_valid_currency])
 
+	def __str__(self):
+		return f'{self.food_item.user.username} -- {self.food_item.food_item_name}: {self.price_amount}'
+
 
 class StandardIngredient(models.Model):
 	meal = models.ForeignKey(Meal,
