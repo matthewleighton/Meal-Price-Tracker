@@ -16,9 +16,24 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from meals import views as meals_views
+
 urlpatterns = [
-    path('', include('meals.urls'), name='home'),
-    path('meals/', include('meals.urls')),
+    # path('meals/', include('meals.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
+
+    path('', meals_views.index, name='index'),
+	
+    path('ingredients', meals_views.food_item_list, name='food_item_list'),
+    path('ingredients/new', meals_views.new_food_item, name='new_food_item'),
+	path('ingredients/<int:food_item_id>', meals_views.food_item, name='food_item'),
+
+    path('purchases', meals_views.price_record_list, name='price_record_list'),
+    path('purchases/new', meals_views.new_food_price_record, name='new_food_price_record'),
+
+    path('mean_instances', meals_views.meal_instance_list, name='meal_instance_list'),
+	path('meal_instance/new', meals_views.new_meal_instance, name='new_meal_instance'),
+	
+    path('my_meals', meals_views.meals_list, name='meals_list')
 ]

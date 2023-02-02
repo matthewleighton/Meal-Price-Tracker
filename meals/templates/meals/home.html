@@ -1,17 +1,38 @@
 {% block content%}
 
-This is the homepage.<br/><br/>
+<h2>This is the homepage.</h2>
 
 {% if user.is_authenticated %}
+	
 	<a href="{% url 'logout' %}">Logout</a>
+	<hr>
 
-	<h3>Your Food Items</h3>
 	<ul>
-		{% for food in food_items %}
-			<li>{{ food }}</li>
-		{% endfor %}
+		<li><a href="{% url 'new_food_price_record' %}">Log Purchases</a></li>
+		<li><a href="{% url 'new_meal_instance' %}">Log Meal</a></li>
+	</ul>
+
+	<hr>
+
+	<ul>
+		<li><a href="{% url 'meals_list' %}">My Meals</a></li>
+		<li><a href="{% url 'food_item_list' %}">My Ingredients</a></li>
+	</ul>
+
+	<hr>
+
+	<ul>
+		<li><a href="{% url 'meal_instance_list' %}">Meal Diary</a></li>
+		<li><a href="{% url 'price_record_list' %}">Purchase Diary</a></li>
 	</ul>
 	
+	{% comment %} <h3>Your Food Items</h3>
+	<ul>
+		{% for food in food_items %}
+			<li><a href="{% url 'food_item' food.id %}">{{ food }}</a></li>
+		{% endfor %}
+	</ul>
+	 {% endcomment %}
 
 
 
