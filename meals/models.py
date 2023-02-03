@@ -68,3 +68,7 @@ class MealInstance(models.Model):
 	num_servings = models.PositiveIntegerField('Number of Servings')
 	rating = models.PositiveIntegerField('Rating', validators=[MealValidators.is_valid_rating])
 	cook_time = models.PositiveIntegerField('Cooking Time')
+
+	def __str__(self):
+		date_string = self.date.strftime('%m/%d/%Y')
+		return f'{self.meal.meal_name} on {date_string}: {self.rating}/5 stars'

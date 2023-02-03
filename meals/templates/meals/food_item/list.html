@@ -1,0 +1,16 @@
+<h2>My Food Items</h2>
+
+<ul>
+	{% for food_item in food_items %}
+		<li>{{ food_item }}</li>
+	{% endfor %}
+</ul>
+
+<h2>Add New Food Item</h2>
+
+<form action="{% url 'new_food_item' %}" method="POST">
+	{% csrf_token %}
+	{{ form }}
+	<input type="submit" value="submit">
+	<input type="hidden" name="next" value="{{ request.path }}">
+</form>
