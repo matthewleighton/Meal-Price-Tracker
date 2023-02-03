@@ -18,6 +18,12 @@ class Meal(models.Model):
 
 		return self.meal_instances
 
+	def average_price(self):
+		return 20
+
+	def count_standard_ingredients(self):
+		return 9001
+
 class FoodItem(models.Model):
 	food_item_name = models.CharField(max_length=100)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
