@@ -182,3 +182,20 @@ def meals_new(request):
 
 	else:
 		return HttpResponseRedirect('/')
+
+def meals_item(request, meal_id):
+	user = request.user
+	if not user.is_authenticated:
+		return HttpResponseRedirect('/')
+
+	meal = get_object_or_404(Meal, pk=meal_id)
+
+	if not meal.user == user:
+		return HttpResponseRedirect('/')
+
+	context = {
+		'meal': meal,
+		'meal_instances': meal.get_meal_instances()
+	}
+
+	return render(request, 'meals/meals/item.html', context)

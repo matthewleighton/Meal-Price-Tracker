@@ -10,6 +10,14 @@ class Meal(models.Model):
 	def __str__(self):
 		return self.meal_name
 
+	def get_meal_instances(self):
+		if hasattr(self, 'meal_instances'):
+			return self.meal_instances
+		
+		self.meal_instances = MealInstance.objects.filter(meal=self)
+
+		return self.meal_instances
+
 class FoodItem(models.Model):
 	food_item_name = models.CharField(max_length=100)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)

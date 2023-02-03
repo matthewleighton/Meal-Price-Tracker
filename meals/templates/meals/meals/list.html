@@ -2,7 +2,7 @@
 
 <ul>
 	{% for meal in meals %}
-		<li>{{ meal.meal_name }}</li>
+		<li><a href="{% url 'meals_item' meal.id %}">{{ meal.meal_name }}</a></li>
 	{% endfor %}
 </ul>
 

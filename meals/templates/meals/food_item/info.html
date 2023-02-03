@@ -2,7 +2,7 @@
 
 <h1>{{ food_item.food_item_name }}</h1>
 
-<a href="{% url 'new_food_price_record' %}">New Price Record</a>
+{% comment %} <a href="{% url 'new_food_price_record' %}">New Price Record</a> {% endcomment %}
 
 <ul>
 	{% for record in price_records %}

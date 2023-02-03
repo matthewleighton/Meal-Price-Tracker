@@ -1,0 +1,11 @@
+<h1>{{ meal.meal_name }}</h1>
+
+{% if meal.meal_instances|length %}
+	<ul>
+		{% for instance in meal_instances %}
+			<li>{{ instance }}</li>
+		{% endfor %}
+	</ul>
+{% else %}
+	You have never cooked this meal.
+{% endif %}
