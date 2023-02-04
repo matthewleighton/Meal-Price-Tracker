@@ -10,19 +10,18 @@ class Meal(models.Model):
 	def __str__(self):
 		return self.meal_name
 
-	def get_meal_instances(self):
-		if hasattr(self, 'meal_instances'):
-			return self.meal_instances
-		
-		self.meal_instances = MealInstance.objects.filter(meal=self)
+	@property
+	def meal_instances(self):
+		return MealInstance.objects.filter(meal=self)
 
-		return self.meal_instances
-
+	@property
 	def average_price(self):
 		return 20
 
-	def count_standard_ingredients(self):
-		return 9001
+	@property
+	def standard_ingredients(self):
+		return StandardIngredient.objects.filter(meal=self)
+		
 
 class FoodItem(models.Model):
 	food_item_name = models.CharField(max_length=100)
