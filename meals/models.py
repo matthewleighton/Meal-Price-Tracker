@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 
 from .validators import MealValidators
 
+from pprint import pprint
+
 class Meal(models.Model):
 	meal_name = models.CharField(max_length=200)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -21,7 +23,15 @@ class Meal(models.Model):
 	@property
 	def standard_ingredients(self):
 		return StandardIngredient.objects.filter(meal=self)
-		
+
+	def get_food_items(self):
+		return [ingredient.food_item for ingredient in self.standard_ingredients ]
+
+	def get_newest_price(self):
+		food_items = self.get_food_items()
+
+		newest_purchases = [item.get_newest_purchase() for item in food_items]
+
 
 class FoodItem(models.Model):
 	food_item_name = models.CharField(max_length=100)
@@ -29,6 +39,9 @@ class FoodItem(models.Model):
 
 	def __str__(self):
 		return self.food_item_name
+
+	def get_newest_purchase(self):
+		return FoodPriceRecord.objects.filter(food_item=self).order_by('-date')[0]
 
 class FoodPriceRecord(models.Model):
 	food_item = models.ForeignKey(FoodItem,
