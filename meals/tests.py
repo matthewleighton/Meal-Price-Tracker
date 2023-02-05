@@ -3,6 +3,7 @@ from meals.models import Meal, MealInstance, FoodItem, StandardIngredient, FoodP
 from django.contrib.auth.models import User
 
 from datetime import date, timedelta
+from decimal import Decimal, getcontext
 
 class MealTestCase(TestCase):
 	def setUp(self):
@@ -102,7 +103,25 @@ class MealTestCase(TestCase):
 		self.assertEqual(toast_actual, toast_expected)
 
 	def test_newest_meal_price_correct(self):
+		# getcontext().prec = 4
 		porridge_actual = self.porridge.get_newest_price()
-		porridge_expected = 15 # 50 grams of oats @ 50 cents per 500 grams, and 100ml milk @ 1 euro per litre.
+		porridge_expected = Decimal('0.15') # 50 grams of oats @ 50 cents per 500 grams, and 100ml milk @ 1 euro per litre.
 
 		self.assertEqual(porridge_actual, porridge_expected)
+
+	
+
+	def test_meal_get_newest_ingredient_price_no_unit_conversion(self):
+		oats_price = self.porridge.get_newest_ingredient_price(self.oats_ingredient)
+		oats_expected = round(Decimal(0.05), 2)
+
+		self.assertEqual(oats_price, oats_expected)
+
+	def test_meal_get_newest_ingredient_price_with_unit_conversion(self):
+		milk_price = self.porridge.get_newest_ingredient_price(self.milk_ingredient)
+		milk_expected = round(Decimal(0.1), 2)
+
+		self.assertEqual(milk_price, milk_expected)
+
+	def test_meal_get_newest_ingredient_price_with_invalid_unit_conversion(self):
+		pass

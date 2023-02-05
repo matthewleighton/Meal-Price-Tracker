@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 
 from .validators import MealValidators
 
+from decimal import getcontext
+from pint import UnitRegistry
+
 from pprint import pprint
 
 class Meal(models.Model):
@@ -27,10 +30,42 @@ class Meal(models.Model):
 	def get_food_items(self):
 		return [ingredient.food_item for ingredient in self.standard_ingredients ]
 
-	def get_newest_price(self):
-		food_items = self.get_food_items()
+	# def get_newest_ingredient_prices(self):
+	# 	return {
+	# 		ingredient: ingredient.get_newest_price() for ingredient in self.standard_ingredients
+	# 	}
 
-		newest_purchases = [item.get_newest_purchase() for item in food_items]
+	# Return the cost of the required amounts of an ingredient for the meal.
+	def get_newest_ingredient_price(self, ingredient):
+		getcontext().prec = 6
+		purchase = ingredient.food_item.get_newest_purchase()
+
+		meal_unit = ingredient.unit
+		meal_quantity = ingredient.quantity
+
+		purchase_unit = purchase.unit
+		purchase_quantity = purchase.quantity
+		purchase_price = purchase.price_amount
+
+		if meal_unit != purchase_unit:
+			# Convert purchase units to meal units.
+			ureg = UnitRegistry()
+			purchase_quantity = ureg.Quantity(purchase_quantity, purchase_unit).to(meal_unit).magnitude
+
+		return (purchase_price / purchase_quantity) * meal_quantity 
+
+	# Return the cost of the meal, based on the most recent price records.
+	def get_newest_price(self):
+		return sum([
+			self.get_newest_ingredient_price(ingredient) for ingredient in self.standard_ingredients
+		])
+
+		
+
+
+
+
+
 
 
 class FoodItem(models.Model):
