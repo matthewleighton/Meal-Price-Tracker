@@ -103,7 +103,6 @@ class MealTestCase(TestCase):
 		self.assertEqual(toast_actual, toast_expected)
 
 	def test_newest_meal_price_correct(self):
-		# getcontext().prec = 4
 		porridge_actual = self.porridge.get_newest_price()
 		porridge_expected = Decimal('0.15') # 50 grams of oats @ 50 cents per 500 grams, and 100ml milk @ 1 euro per litre.
 
@@ -123,5 +122,4 @@ class MealTestCase(TestCase):
 
 		self.assertEqual(milk_price, milk_expected)
 
-	def test_meal_get_newest_ingredient_price_with_invalid_unit_conversion(self):
-		pass
+	

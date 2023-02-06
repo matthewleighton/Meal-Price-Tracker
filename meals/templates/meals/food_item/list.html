@@ -1,16 +1,20 @@
-<h2>My Food Items</h2>
+{% extends '../base.html' %}
 
-<ul>
-	{% for food_item in food_items %}
-		<li><a href="{% url 'food_item' food_item.id %}">{{ food_item.food_item_name }}</a></li>
-	{% endfor %}
-</ul>
+{% block content %}
+	<h2>My Food Items</h2>
 
-<h2>Add New Food Item</h2>
+	<ul>
+		{% for food_item in food_items %}
+			<li><a href="{% url 'food_item' food_item.id %}">{{ food_item.food_item_name }}</a></li>
+		{% endfor %}
+	</ul>
 
-<form action="{% url 'new_food_item' %}" method="POST">
-	{% csrf_token %}
-	{{ form }}
-	<input type="submit" value="submit">
-	<input type="hidden" name="next" value="{{ request.path }}">
-</form>
+	<h2>Add New Food Item</h2>
+
+	<form action="{% url 'new_food_item' %}" method="POST">
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" value="submit">
+		<input type="hidden" name="next" value="{{ request.path }}">
+	</form>
+{% endblock  %}

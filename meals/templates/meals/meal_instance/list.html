@@ -1,7 +1,11 @@
-<h1>Meal Diary</h1>
+{% extends "../base.html" %}
 
-<ul>
-	{% for meal_instance in meal_instances %}
-		<li>{{ meal_instance }}</li>
-	{% endfor %}
-</ul>
+{% block content %}
+	<h1>Meal Diary</h1>
+
+	<ul>
+		{% for meal_instance in meal_instances %}
+			<li>{{ meal_instance }}</li>
+		{% endfor %}
+	</ul>
+{% endblock %}

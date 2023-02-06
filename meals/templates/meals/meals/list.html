@@ -1,18 +1,22 @@
-<h1>My Meals</h1>
+{% extends "../base.html" %}
 
-<ul>
-	{% for meal in meals %}
-		<li><a href="{% url 'meals_item' meal.id %}">{{ meal.meal_name }}</a></li>
-	{% endfor %}
-</ul>
+{% block content %}
+	<h1>My Meals</h1>
 
-<hr>
+	<ul>
+		{% for meal in meals %}
+			<li><a href="{% url 'meals_item' meal.id %}">{{ meal.meal_name }}</a></li>
+		{% endfor %}
+	</ul>
 
-<h2>New Meal</h2>
+	<hr>
 
-<form action="{% url 'meals_new' %}" method="POST">
-	{% csrf_token %}
-	{{ form }}
-	<input type="submit" value="submit">
-	<input type="hidden" name="redirect_location" value="{{ request.path }}">
-</form>
+	<h2>New Meal</h2>
+
+	<form action="{% url 'meals_new' %}" method="POST">
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" value="submit">
+		<input type="hidden" name="redirect_location" value="{{ request.path }}">
+	</form>
+{% endblock content %}

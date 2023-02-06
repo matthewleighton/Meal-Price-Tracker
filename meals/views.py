@@ -195,7 +195,7 @@ def meals_item(request, meal_id):
 
 	context = {
 		'meal': meal,
-		'meal_instances': meal.get_meal_instances()
+		'meal_instances': meal.meal_instances
 	}
 
 	return render(request, 'meals/meals/item.html', context)

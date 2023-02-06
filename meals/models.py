@@ -49,6 +49,11 @@ class Meal(models.Model):
 
 		if meal_unit != purchase_unit:
 			# Convert purchase units to meal units.
+			
+			#TODO: We need to handle the case where the meal unit and purchase units cannot be converted.
+			# e.g. length vs mass. Perhaps FoodItems should have a "unit type" definition.
+			# Or ingredients and purchases have their unit options limited by the choise of the base FoodItem.
+
 			ureg = UnitRegistry()
 			purchase_quantity = ureg.Quantity(purchase_quantity, purchase_unit).to(meal_unit).magnitude
 
