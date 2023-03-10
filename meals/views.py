@@ -39,6 +39,7 @@ def food_item_list(request):
 
 	return render(request, 'meals/food_item/list.html', context)
 
+# View a single food item.
 def food_item(request, food_item_id):
 	food_item = get_object_or_404(FoodItem, pk=food_item_id)
 	price_records = FoodPriceRecord.objects.filter(food_item=food_item)
@@ -50,6 +51,7 @@ def food_item(request, food_item_id):
 
 	return render(request, 'meals/food_item/info.html', context)
 
+# Create a new food item.
 def new_food_item(request):
 	if request.method == 'POST':
 		form = FoodItemForm(request.POST)

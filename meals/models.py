@@ -37,6 +37,10 @@ class Meal(models.Model):
 
 	# Return the cost of the required amounts of an ingredient for the meal.
 	def get_newest_ingredient_price(self, ingredient):
+
+		if isinstance(ingredient, str):
+			ingredient = StandardIngredient.objects.get(meal=self, food_item__food_item_name__iexact=ingredient)
+
 		getcontext().prec = 6
 		purchase = ingredient.food_item.get_newest_purchase()
 
@@ -72,7 +76,8 @@ class Meal(models.Model):
 
 
 
-
+# This describes a FoodItem that can be used in a meal.
+# A FoodItem becomes an ingredient when it is used in a meal.
 class FoodItem(models.Model):
 	food_item_name = models.CharField(max_length=100)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -83,6 +88,8 @@ class FoodItem(models.Model):
 	def get_newest_purchase(self):
 		return FoodPriceRecord.objects.filter(food_item=self).order_by('-date')[0]
 
+# This describes an instance of a FoodItem being purchased.
+# We can use this to track the price of a FoodItem over time.
 class FoodPriceRecord(models.Model):
 	food_item = models.ForeignKey(FoodItem,
 								  on_delete=models.CASCADE)
@@ -111,7 +118,7 @@ class FoodPriceRecord(models.Model):
 	def __str__(self):
 		return f'{self.food_item.user.username} -- {self.food_item.food_item_name}: {self.price_amount}'
 
-
+# A Meal is made up of a collection of StandardIngredients.
 class StandardIngredient(models.Model):
 	meal = models.ForeignKey(Meal,
 							 on_delete=models.CASCADE)
@@ -127,6 +134,7 @@ class StandardIngredient(models.Model):
 							max_length=20,
 							validators=[MealValidators.is_valid_unit])
 
+# This describes a particular time when a Meal was made.
 class MealInstance(models.Model):
 	meal = models.ForeignKey(Meal,
 							 on_delete=models.CASCADE)
