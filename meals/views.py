@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
+from django.views.decorators.http import require_POST
 
 from .forms import FoodItemForm, FoodPriceRecordForm, MealForm, MealInstanceForm
 from .models import FoodItem, FoodPriceRecord, Meal, MealInstance
@@ -164,32 +165,30 @@ def meals_list(request):
 
 	return render(request, 'meals/meals/list.html', context)
 
+@require_POST
 def meals_new(request):
 	user = request.user
+
 	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
 
-	if request.method == 'POST':
-		form = MealForm(request.POST)
+	form = MealForm(request.POST)
+	user = request.user
 
-		user = request.user
+	if form.is_valid():
+		meal = form.save(commit=False)
+		meal.user = request.user
+		meal.save()
 
-		if form.is_valid():
-			meal = form.save(commit=False)
-			meal.user = request.user
-			meal.save()
+	redirect_location = request.POST.get('redirect_location', '/')
+	return HttpResponseRedirect(redirect_location)
 
-			redirect_location = request.POST.get('redirect_location', '/')
-			return HttpResponseRedirect(redirect_location)
-
-	else:
-		return HttpResponseRedirect('/')
 
 def meals_item(request, meal_id):
 	user = request.user
 	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
-
+	
 	meal = get_object_or_404(Meal, pk=meal_id)
 
 	if not meal.user == user:

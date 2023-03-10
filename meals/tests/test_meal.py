@@ -133,3 +133,101 @@ def test_get_newest_ingredient_price_no_unit_conversion(user, oats_ingredient_qt
 								   unit='g', location='Lidl', date=date.today())
 
 	assert porridge.get_newest_ingredient_price('oats') == oats_ingredient_price
+
+
+##############################################################################
+#------------------------------- Testing Views ------------------------------#
+##############################################################################
+
+def test_meals_endpoint_redirect_logged_out(client, user):
+	assert client.get('/meals/').status_code == 302
+	client.force_login(user)
+	assert client.get('/meals/').status_code == 200
+
+# Test that the meals endpoint returns the correct meals for the logged in user.
+def test_meals_endpoint_context_meals(client, user, other_user):
+	Meal.objects.create(meal_name='Porridge', user=user)
+	Meal.objects.create(meal_name='Toast', user=user)
+	Meal.objects.create(meal_name='Pizza', user=other_user)
+
+	client.force_login(user)
+	response = client.get('/meals/')
+
+	assert response.status_code == 200
+	assert set(response.context['meals']) == set(Meal.objects.filter(user=user))
+	assert len(response.context['meals']) == 2
+
+
+def test_meals_new_GET_requests_return_405(client, user):
+	# Loggged out
+	assert client.get('/meals/new/').status_code == 405
+	
+	# Logged in
+	client.force_login(user)
+	assert client.get('/meals/new/').status_code == 405
+
+def test_meals_new_logged_out_user_redirected_to_homepage(client, user):
+	response = client.post('/meals/new/')
+	
+	assert response.status_code == 302
+	assert response.url == '/'
+
+def test_meals_new_logged_in_user_creates_meal(client, user):
+	redirect_url = '/my_redirect_location/'
+	meal_name = 'Porridge'
+
+	client.force_login(user)
+	
+	assert Meal.objects.count() == 0
+	response = client.post('/meals/new/', {'meal_name': meal_name, 'redirect_location': redirect_url})
+	
+	assert Meal.objects.count() == 1
+	assert Meal.objects.first().meal_name == meal_name
+	assert response.status_code == 302
+	assert response.url == redirect_url
+
+	# Create a second meal.
+	client.post('/meals/new/', {'meal_name': 'Toast', 'redirect_location': redirect_url})
+	assert Meal.objects.count() == 2
+	
+
+def test_meals_item_logged_out_user_redirected_to_homepage(client):
+	response = client.post('/meals/1/')
+	
+	assert response.status_code == 302
+	assert response.url == '/'
+
+def test_meals_item_404_for_nonexistent_meal(client, user):
+	client.force_login(user)
+	response = client.post('/meals/124234234/')
+	
+	assert response.status_code == 404
+
+# The user should be redirected to the homepage if they try to access a meal that is not theirs.
+def test_meals_item_redirect_to_homepage_for_other_users_meals(client, user, other_user):
+	other_users_meal = Meal.objects.create(meal_name='Porridge', user=other_user)
+	client.force_login(user)
+	response = client.post(f'/meals/{other_users_meal.id}/')
+	
+	assert response.status_code == 302
+	assert response.url == '/'
+
+# Test that the meals_item endpoint returns the correct meal and meal instances for the logged in user.
+def test_meals_item_success(client, user):
+	today = date.today()
+	yesterday = today - timedelta(days=1)
+
+	porridge = Meal.objects.create(meal_name='Porridge', user=user)
+	instance_1 = MealInstance.objects.create(meal=porridge, date=today, num_servings=1, rating=5, cook_time=20)
+	instance_2 = MealInstance.objects.create(meal=porridge, date=yesterday, num_servings=1, rating=5, cook_time=20)
+
+	toast = Meal.objects.create(meal_name='Toast', user=user) # Create a meal that should not be returned.
+	MealInstance.objects.create(meal=toast, date=today, num_servings=1, rating=5, cook_time=20)
+
+	client.force_login(user)
+	response = client.post(f'/meals/{porridge.id}/')
+
+	assert response.status_code == 200
+	assert response.context['meal'] == porridge
+	assert len(response.context['meal_instances']) == 2
+	assert set(response.context['meal_instances']) == set([instance_1, instance_2])
