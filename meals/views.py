@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.http import require_POST
+from django.forms import formset_factory
 
-from .forms import FoodItemForm, FoodPriceRecordForm, MealForm, MealInstanceForm
-from .models import FoodItem, FoodPriceRecord, Meal, MealInstance
+
+from dal import autocomplete
+
+from .forms import FoodItemForm, FoodPriceRecordForm, MealForm, MealInstanceForm, StandardIngredientForm
+from .models import FoodItem, FoodPriceRecord, Meal, MealInstance, StandardIngredient
 
 from pprint import pprint
 
@@ -72,6 +76,22 @@ def new_food_item(request):
 	
 
 	return render(request, 'meals/food_item/new.html', context)
+
+
+class FoodItemAutocomplete(autocomplete.Select2QuerySetView):
+	def get_queryset(self):
+
+		print('self.q: ', self.q)
+
+		if not self.request.user.is_authenticated:
+			return FoodItem.objects.none()
+
+		qs = FoodItem.objects.filter(user=self.request.user)
+
+		if self.q:
+			qs = qs.filter(food_item_name__istartswith=self.q)
+
+		return qs
 
 ##############################################################################
 #-------------------------- Food Price Record -------------------------------#
@@ -156,10 +176,12 @@ def meals_list(request):
 		return redirect('/')
 
 	meals = Meal.objects.filter(user=user)
-	form = MealForm()
+	meal_form = MealForm()
+	IngrdientFormset = formset_factory(StandardIngredientForm, extra=2)
 
 	context = {
-		'form': form,
+		'meal_form': meal_form,
+		'ingredient_formset': IngrdientFormset(prefix='ingredient'),
 		'meals': meals
 	}
 
@@ -172,14 +194,53 @@ def meals_new(request):
 	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
 
-	form = MealForm(request.POST)
-	user = request.user
+	StandardIngredientFormSet = formset_factory(StandardIngredientForm)
+	ingredient_formset = StandardIngredientFormSet(request.POST, request.FILES, prefix='ingredient')
 
-	if form.is_valid():
-		meal = form.save(commit=False)
-		meal.user = request.user
-		meal.save()
+	meal_form = MealForm(request.POST)
 
+	if meal_form.is_valid():
+		meal = Meal.objects.create(
+			user=user,
+			meal_name=meal_form.cleaned_data.get('meal_name'),
+		)
+	else:
+		print('meal form is not valid')
+		print(meal_form.errors)
+		exit() # TODO: handle this better
+
+	if ingredient_formset.is_valid():
+		for form in ingredient_formset:
+
+			food_item_id = form.cleaned_data.get('food_item_id')
+			food_item_name = form.cleaned_data.get('food_item_name')
+			quantity = form.cleaned_data.get('quantity')
+			unit = form.cleaned_data.get('unit')
+
+			if not food_item_id:
+				food_item = FoodItem.objects.create(
+					user=user,
+					food_item_name=food_item_name
+				)
+			else:
+				food_item = FoodItem.objects.get(pk=food_item_id)
+
+			ingredient = StandardIngredient.objects.create(
+				meal=meal,
+				food_item=food_item,
+				quantity=quantity,
+				unit=unit
+			)
+
+			print('Created ingredient: ')
+			pprint(ingredient.__dict__)
+
+	else:
+		print('ingredient_formset is not valid')
+		print(ingredient_formset.errors)
+		print(ingredient_formset.management_form.errors)
+
+		
 	redirect_location = request.POST.get('redirect_location', '/')
 	return HttpResponseRedirect(redirect_location)
 

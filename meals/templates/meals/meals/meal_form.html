@@ -1,0 +1,31 @@
+<form action="{% url 'meals_new' %}" method="POST">
+	{% csrf_token %}
+	<p>Meal Name: {{ meal_form.meal_name }}</p>
+	
+	<hr/>
+	<div id="ingredients-container">
+		{{ ingredient_formset.management_form }}
+
+		{% for form in ingredient_formset %}
+			{{ form.as_p }}
+			<hr/>
+		{% endfor %}
+
+	</div>
+
+
+	<br/>
+	<button type="button" onclick=addIngredientForm()>Add Ingredient</button>
+
+	<button type="submit">Submit</button>
+</form>
+
+<script>
+	{% comment %} function addIngredientForm() {
+		alert('add ingredient form');
+	} {% endcomment %}
+	
+	{% comment %} $(document).ready(function() {
+		$('select').select2();
+	}); {% endcomment %}
+</script>

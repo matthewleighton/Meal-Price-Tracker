@@ -31,12 +31,17 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'meals.apps.MealsConfig',
+    'dal',
+    'dal_select2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'crispy_forms',
+    'crispy_bootstrap4',
+    'django_select2',
 ]
 
 MIDDLEWARE = [
@@ -129,6 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 try:
     from local_settings import *
