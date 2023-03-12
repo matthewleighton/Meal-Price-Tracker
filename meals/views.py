@@ -177,7 +177,7 @@ def meals_list(request):
 
 	meals = Meal.objects.filter(user=user)
 	meal_form = MealForm()
-	IngrdientFormset = formset_factory(StandardIngredientForm, extra=2)
+	IngrdientFormset = formset_factory(StandardIngredientForm, extra=0)
 
 	context = {
 		'meal_form': meal_form,
@@ -252,12 +252,17 @@ def meals_item(request, meal_id):
 	
 	meal = get_object_or_404(Meal, pk=meal_id)
 
+	standard_ingredients = StandardIngredient.objects.filter(meal=meal)
+
 	if not meal.user == user:
 		return HttpResponseRedirect('/')
+	
+	pprint(standard_ingredients)
 
 	context = {
 		'meal': meal,
-		'meal_instances': meal.meal_instances
+		'standard_ingredients': standard_ingredients,
+		'meal_instances': meal.meal_instances,
 	}
 
 	return render(request, 'meals/meals/item.html', context)

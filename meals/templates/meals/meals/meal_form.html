@@ -3,16 +3,14 @@
 	<p>Meal Name: {{ meal_form.meal_name }}</p>
 	
 	<hr/>
-	<div id="ingredients-container">
-		{{ ingredient_formset.management_form }}
 
-		{% for form in ingredient_formset %}
-			{{ form.as_p }}
-			<hr/>
-		{% endfor %}
+	{{ ingredient_formset.management_form }}
 
+	<div id="ingredients-container"></div>
+
+	<div id="empty-ingredient-form" style="display:none">
+		{{ ingredient_formset.empty_form.as_p }}
 	</div>
-
 
 	<br/>
 	<button type="button" onclick=addIngredientForm()>Add Ingredient</button>
@@ -21,11 +19,13 @@
 </form>
 
 <script>
-	{% comment %} function addIngredientForm() {
-		alert('add ingredient form');
-	} {% endcomment %}
-	
-	{% comment %} $(document).ready(function() {
-		$('select').select2();
-	}); {% endcomment %}
+	function addIngredientForm() {
+		var formCountInput = document.getElementById('id_ingredient-TOTAL_FORMS');
+		var formCount = parseInt(formCountInput.value);
+		var tmplMarkup = document.getElementById('empty-ingredient-form').innerHTML;
+		var compiledTmpl = tmplMarkup.replace(/__prefix__/g, formCount);
+		var container = document.getElementById('ingredients-container');
+		container.insertAdjacentHTML('beforeend', compiledTmpl);
+		formCountInput.value = formCount + 1;
+	}
 </script>

@@ -120,6 +120,10 @@ class FoodPriceRecord(models.Model):
 
 # A Meal is made up of a collection of StandardIngredients.
 class StandardIngredient(models.Model):
+
+	def __str__(self):
+		return f'{self.meal.meal_name}: {self.food_item.food_item_name}'
+
 	meal = models.ForeignKey(Meal,
 							 on_delete=models.CASCADE)
 	
