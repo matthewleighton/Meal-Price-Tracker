@@ -117,7 +117,7 @@ def new_food_price_record(request):
 		return HttpResponseRedirect('/')
 	
 	if request.method == 'POST':
-		form = FoodPriceRecordForm(request.POST)
+		form = FoodPriceRecordForm(request.POST, request=request)
 
 		if form.is_valid():
 			form.save()
