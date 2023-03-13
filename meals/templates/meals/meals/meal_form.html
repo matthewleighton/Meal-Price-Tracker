@@ -6,14 +6,25 @@
 
 	{{ ingredient_formset.management_form }}
 
-	<div id="ingredients-container"></div>
+	<div id="ingredients-container">
+		{% for form in ingredient_formset %}
+			<div id="ingredient-form-{{ forloop.counter0 }}">
+				{{ form.as_p }}
+				<button type="button" onclick="deleteIngredientForm({{ forloop.counter0 }})">Delete</button>
+			</div>
+		{% endfor %}
+	</div>
 
 	<div id="empty-ingredient-form" style="display:none">
 		{{ ingredient_formset.empty_form.as_p }}
+		<button type="button" onclick="deleteIngredientForm('__prefix__')">Delete</button>
+		<hr/>
 	</div>
 
 	<br/>
 	<button type="button" onclick=addIngredientForm()>Add Ingredient</button>
+
+	<input type="hidden" name="redirect_location" value="{{ request.path }}">
 
 	<button type="submit">Submit</button>
 </form>
@@ -24,8 +35,17 @@
 		var formCount = parseInt(formCountInput.value);
 		var tmplMarkup = document.getElementById('empty-ingredient-form').innerHTML;
 		var compiledTmpl = tmplMarkup.replace(/__prefix__/g, formCount);
-		var container = document.getElementById('ingredients-container');
-		container.insertAdjacentHTML('beforeend', compiledTmpl);
+		var container = document.createElement('div');
+		container.id = 'ingredient-form-' + formCount;
+		container.innerHTML = compiledTmpl;
+		var formContainer = document.getElementById('ingredients-container');
+		formContainer.appendChild(container);
 		formCountInput.value = formCount + 1;
+	}
+
+	function deleteIngredientForm(formId) {
+		var formContainer = document.getElementById('ingredients-container');
+		var form = document.getElementById('ingredient-form-' + formId);
+		formContainer.removeChild(form);
 	}
 </script>

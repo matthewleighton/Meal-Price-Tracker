@@ -1,5 +1,7 @@
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.forms import formset_factory
 
@@ -240,9 +242,9 @@ def meals_new(request):
 		print(ingredient_formset.errors)
 		print(ingredient_formset.management_form.errors)
 
-		
-	redirect_location = request.POST.get('redirect_location', '/')
-	return HttpResponseRedirect(redirect_location)
+	
+	messages.success(request, f'Meal "{meal.meal_name}" has been created!')
+	return redirect(reverse('meals_item', args=[meal.id]))
 
 
 def meals_item(request, meal_id):

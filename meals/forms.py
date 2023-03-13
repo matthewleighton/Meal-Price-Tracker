@@ -39,6 +39,8 @@ class StandardIngredientForm(forms.ModelForm):
 	food_item_name = forms.CharField(max_length=50, label="Food Item Name", required=False)
 	food_item_id = forms.IntegerField(required=False)
 
+	field_order = ['food_item_name', 'food_item_id', 'quantity', 'unit']
+
 
 		# widgets = {
 		# 	'food_item': autocomplete.ModelSelect2(
