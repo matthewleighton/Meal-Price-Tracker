@@ -2,20 +2,27 @@
 
 {% block content%}
 
-<h1>{{ meal.meal_name }}</h1>
+<h1>Meal: {{ meal.meal_name }}</h1>
 
 <h2>Ingredients</h2>
+<ul>
+	{% for ingredient in standard_ingredients %}
+		<li>
+			{{ ingredient.quantity }} {{ ingredient.unit }} 
+			<a href="{% url 'food_item' food_item_id=ingredient.food_item.pk %}">
+				{{ ingredient.food_item.food_item_name }}
+			</a>
+		</li>
+	{% endfor %}
+</ul>
 
-{% for ingredient in standard_ingredients %}
-	<li>{{ ingredient.quantity }} {{ ingredient.unit }} {{ ingredient.food_item.food_item_name }}</li>
-{% endfor %}
 
 <h2>Times Cooked</h2>
 
 {% if meal.meal_instances|length %}
 	<ul>
 		{% for instance in meal_instances %}
-			<li>{{ instance }}</li>
+			<li>{{ instance.list_format }}</li>
 		{% endfor %}
 	</ul>
 {% else %}

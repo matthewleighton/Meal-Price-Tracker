@@ -87,6 +87,13 @@ class FoodItem(models.Model):
 
 	def get_newest_purchase(self):
 		return FoodPriceRecord.objects.filter(food_item=self).order_by('-date')[0]
+	
+	# Return a list of all the meals that use this FoodItem.
+	@property
+	def meals(self):
+		return Meal.objects.filter(
+			models.Q(standardingredient__food_item=self)
+		)
 
 # This describes an instance of a FoodItem being purchased.
 # We can use this to track the price of a FoodItem over time.
@@ -151,3 +158,7 @@ class MealInstance(models.Model):
 	def __str__(self):
 		date_string = self.date.strftime('%m/%d/%Y')
 		return f'{self.meal.meal_name} on {date_string}: {self.rating}/5 stars'
+	
+	def list_format(self):
+		date_string = self.date.strftime('%m/%d/%Y')
+		return f'{date_string} | {self.rating}/5 stars | {self.cook_time} minutes cooking time'

@@ -4,8 +4,12 @@
 	<h1>Meal Diary</h1>
 
 	<ul>
-		{% for meal_instance in meal_instances %}
-			<li>{{ meal_instance.date }}: <a href="{% url 'meals_item' meal_id=meal_instance.meal.pk %}">{{ meal_instance.meal.meal_name }}</a></li>
+		{% for instance in meal_instances %}
+			<li> 
+				<a href="{% url 'meals_item' meal_id=instance.meal.pk %}">
+					{{ instance.meal.meal_name }}:
+				</a> {{ instance.list_format }}
+			</li>
 		{% endfor %}
 	</ul>
 {% endblock %}

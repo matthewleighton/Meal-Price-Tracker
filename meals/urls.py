@@ -1,8 +1,8 @@
 from django.urls import path
-from django.urls import re_path
+# from django.urls import re_path
 
 from . import views
-from .views import FoodItemAutocomplete
+# from .views import FoodItemAutocomplete
 
 urlpatterns = [
 
@@ -15,11 +15,12 @@ urlpatterns = [
 	path('ingredients/', views.food_item_list, name='food_item_list'),
 	path('ingredients/new/', views.new_food_item, name='new_food_item'),
 	path('ingredients/<int:food_item_id>/', views.food_item, name='food_item'),
-    re_path(
-		r'^ingredients/autocomplete/$',
-        FoodItemAutocomplete.as_view(),
-        name='food_item_autocomplete',
-	),
+    
+	# re_path(
+	# 	r'^ingredients/autocomplete/$',
+    #     FoodItemAutocomplete.as_view(),
+    #     name='food_item_autocomplete',
+	# ),
 	
 	path('purchases/', views.price_record_list, name='purchase_list'),
 	path('purchases/new/', views.new_food_price_record, name='new_purchase'),

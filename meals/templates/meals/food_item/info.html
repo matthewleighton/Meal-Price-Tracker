@@ -1,13 +1,31 @@
+{% extends "../base.html" %}
 {% block content%}
 
-<h1>{{ food_item.food_item_name }}</h1>
+<h1>Ingredient: {{ food_item.food_item_name }}</h1>
 
-{% comment %} <a href="{% url 'new_food_price_record' %}">New Price Record</a> {% endcomment %}
+<h3>Meals</h3>
 
-<ul>
-	{% for record in price_records %}
-		<li>{{ record.currency }} {{ record.price_amount }} for {{ record.quantity }} from {{ record.location }} on {{ record.date }}</li>
-	{% endfor %}
-</ul>
+{% if meals %}
+	<ul>
+		{% for meal in meals %}
+			<li><a href="{% url 'meals_item' meal_id=meal.pk %}">{{ meal.meal_name }}</a></li>
+		{% endfor %}
+	</ul>
+{% else %}
+	<p>{{ food_item.food_item_name }} is not used in any meals.</p>
+{% endif %}
+
+<h3>Purchases</h3>
+
+{% if price_records %}
+	<ul>
+		{% for record in price_records %}
+			<li>{{ record.currency }} {{ record.price_amount }} for {{ record.quantity }} from {{ record.location }} on {{ record.date }}</li>
+		{% endfor %}
+	</ul>
+{% else %}
+	<p>{{ food_item.food_item_name }} has not been purchased.</p>
+{% endif %}
+
 
 {% endblock %}

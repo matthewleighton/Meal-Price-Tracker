@@ -17,6 +17,10 @@ class MealInstanceForm(forms.ModelForm):
 	class Meta:
 		model = MealInstance
 		fields = ['meal', 'date', 'num_servings', 'rating', 'cook_time']
+		
+		widgets = {
+			'date': forms.DateInput(attrs={'type': 'date'})
+		}
 
 
 class FoodItemForm(forms.ModelForm):

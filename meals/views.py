@@ -50,10 +50,13 @@ def food_item_list(request):
 def food_item(request, food_item_id):
 	food_item = get_object_or_404(FoodItem, pk=food_item_id)
 	price_records = FoodPriceRecord.objects.filter(food_item=food_item)
+	
+	meals = food_item.meals
 
 	context = {
 		'food_item': food_item,
-		'price_records': price_records
+		'price_records': price_records,
+		'meals': meals
 	}
 
 	return render(request, 'meals/food_item/info.html', context)
@@ -142,7 +145,7 @@ def meal_instance_list(request):
 	if not user.is_authenticated:
 		return redirect('/')
 
-	meal_instances = MealInstance.objects.filter(meal__user__exact=user)
+	meal_instances = MealInstance.objects.filter(meal__user__exact=user).order_by('-date')
 
 	context = {
 		'user': user,
