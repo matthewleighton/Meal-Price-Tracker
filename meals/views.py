@@ -106,7 +106,10 @@ def price_record_list(request):
 
 	price_records = FoodPriceRecord.objects.filter(food_item__user__exact=user)
 
+	form = FoodPriceRecordForm()
+
 	context = {
+		'form': form,
 		'price_records': price_records
 	}
 

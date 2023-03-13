@@ -3,6 +3,10 @@
 {% block content %}
 	<h1>Food Purchase Diary</h1>
 
+	{{ form.as_p }}
+
+	<br><br>
+
 	<ul>
 		{% for purchase in price_records %}
 			<li>{{ purchase }}</li>

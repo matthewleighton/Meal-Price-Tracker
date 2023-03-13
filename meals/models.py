@@ -91,6 +91,10 @@ class FoodItem(models.Model):
 # This describes an instance of a FoodItem being purchased.
 # We can use this to track the price of a FoodItem over time.
 class FoodPriceRecord(models.Model):
+
+	def __str__(self):
+		return f'{self.food_item.food_item_name}: {self.price_amount} {self.currency} for {self.quantity} {self.unit} @ {self.location} on {self.date}'		
+
 	food_item = models.ForeignKey(FoodItem,
 								  on_delete=models.CASCADE)
 
@@ -114,9 +118,6 @@ class FoodPriceRecord(models.Model):
 	currency = models.CharField('Currency', 
 								max_length=3, 
 								validators=[MealValidators.is_valid_currency])
-
-	def __str__(self):
-		return f'{self.food_item.user.username} -- {self.food_item.food_item_name}: {self.price_amount}'
 
 # A Meal is made up of a collection of StandardIngredients.
 class StandardIngredient(models.Model):

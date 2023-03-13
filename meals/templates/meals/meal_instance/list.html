@@ -5,7 +5,7 @@
 
 	<ul>
 		{% for meal_instance in meal_instances %}
-			<li>{{ meal_instance }}</li>
+			<li>{{ meal_instance.date }}: <a href="{% url 'meals_item' meal_id=meal_instance.meal.pk %}">{{ meal_instance.meal.meal_name }}</a></li>
 		{% endfor %}
 	</ul>
 {% endblock %}
