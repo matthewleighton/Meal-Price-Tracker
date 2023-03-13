@@ -180,7 +180,15 @@ def test_meals_new_logged_in_user_creates_meal_no_ingredients(client, user):
 	client.force_login(user)
 	
 	assert Meal.objects.count() == 0
-	response = client.post('/meals/new/', {'meal_name': meal_name})
+
+
+	post_data = {
+		'ingredient-TOTAL_FORMS': 0,
+		'ingredient-INITIAL_FORMS': 0,
+		'meal_name': meal_name,
+	}
+
+	response = client.post('/meals/new/', post_data)
 	
 	assert Meal.objects.count() == 1
 	assert Meal.objects.first().meal_name == meal_name
@@ -191,7 +199,13 @@ def test_meals_new_logged_in_user_creates_meal_no_ingredients(client, user):
 	assert response.url == f'/meals/{meal_id}/'
 
 	# Create a second meal.
-	response = client.post('/meals/new/', {'meal_name': 'Toast'})
+	post_data = {
+		'ingredient-TOTAL_FORMS': 0,
+		'ingredient-INITIAL_FORMS': 0,
+		'meal_name': 'Toast',
+	}
+
+	response = client.post('/meals/new/', post_data)
 	assert Meal.objects.count() == 2
 	assert response.status_code == 302
 	
@@ -280,7 +294,108 @@ def test_meals_create_with_new_food_items(client, user):
 	assert ingredients[1].quantity == 200
 	assert ingredients[1].unit == 'ml'
 
+# Test that a meal can be created with new and existing food items.
+def test_meals_create_with_new_and_existing_food_items(client, user):
+	# Oats already exists before the request.
+	oats = FoodItem.objects.create(food_item_name='Oats', user=user)
 	
+	post_data = {
+		'ingredient-TOTAL_FORMS': 2,
+		'ingredient-INITIAL_FORMS': 0,
+		'meal_name': 'Porridge',
+		'ingredient-0-food_item_id': oats.id, 
+		'ingredient-0-food_item_name': '',
+		'ingredient-0-quantity': 100,
+		'ingredient-0-unit': 'g',
+		'ingredient-1-food_item_id': '',
+		'ingredient-1-food_item_name': 'Milk',
+		'ingredient-1-quantity': 200,
+		'ingredient-1-unit': 'ml',
+	}
+
+	client.force_login(user)
+
+	client.post('/meals/new/', post_data)
+	assert Meal.objects.count() == 1
+	
+	porridge = Meal.objects.first()
+	assert porridge.meal_name == 'Porridge'
+
+	food_items = FoodItem.objects.all()
+	assert len(food_items) == 2
+
+	# Check that milk has been created correctly.
+	milk = FoodItem.objects.get(food_item_name='Milk')
+	assert milk.user == user
+
+	ingredients = porridge.standard_ingredients
+	assert len(ingredients) == 2
+
+	assert ingredients[0].food_item == oats
+	assert ingredients[0].quantity == 100
+	assert ingredients[0].unit == 'g'
+
+	assert ingredients[1].food_item == milk
+	assert ingredients[1].quantity == 200
+	assert ingredients[1].unit == 'ml'
+
+# Test that a meal cannot be created when a food_item id belongs to a different user.
+def test_meals_create_with_other_users_food_item(client, user, other_user):
+	milk = FoodItem.objects.create(food_item_name='Milk', user=other_user)
+
+	post_data = {
+		'ingredient-TOTAL_FORMS': 2,
+		'ingredient-INITIAL_FORMS': 0,
+		'meal_name': 'Porridge',
+		'ingredient-0-food_item_id': '', 
+		'ingredient-0-food_item_name': 'Oats',
+		'ingredient-0-quantity': 100,
+		'ingredient-0-unit': 'g',
+		'ingredient-1-food_item_id': milk.id,
+		'ingredient-1-food_item_name': '',
+		'ingredient-1-quantity': 200,
+		'ingredient-1-unit': 'ml',
+	}
+
+	client.force_login(user)
+
+	response = client.post('/meals/new/', post_data)
+	assert response.status_code == 403
+
+	assert Meal.objects.count() == 0
+
+# Test that a meal cannot be created with an invalid food item id.
+def test_meals_create_with_invalid_food_item_id(client, user):
+	invalid_id = 123132423
+
+	# Confirming that the food item does not exist.
+	assert FoodItem.objects.filter(id=invalid_id).count() == 0
+	
+	post_data = {
+		'ingredient-TOTAL_FORMS': 2,
+		'ingredient-INITIAL_FORMS': 0,
+		'meal_name': 'Porridge',
+		'ingredient-0-food_item_id': '', 
+		'ingredient-0-food_item_name': 'Oats',
+		'ingredient-0-quantity': 100,
+		'ingredient-0-unit': 'g',
+		'ingredient-1-food_item_id': invalid_id,
+		'ingredient-1-food_item_name': '',
+		'ingredient-1-quantity': 200,
+		'ingredient-1-unit': 'ml',
+	}
+
+	client.force_login(user)
+	client.post('/meals/new/', post_data)
+
+	assert Meal.objects.count() == 0
+
+
+def test_meals_create_logged_out_user_redirected_to_homepage(client):
+	response = client.post('/meals/new/')
+	
+	assert response.status_code == 302
+	assert response.url == '/'
 
 def test_meals_item_logged_out_user_redirected_to_homepage(client):
 	response = client.post('/meals/1/')

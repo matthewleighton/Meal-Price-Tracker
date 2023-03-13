@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.forms import formset_factory
@@ -196,47 +196,56 @@ def meals_new(request):
 	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
 	
+	meal_form = MealForm(request.POST)
 	StandardIngredientFormSet = formset_factory(StandardIngredientForm)
 	ingredient_formset = StandardIngredientFormSet(request.POST, request.FILES, prefix='ingredient')
 
-	meal_form = MealForm(request.POST)
-
-	if meal_form.is_valid():
-		meal = Meal.objects.create(
-			user=user,
-			meal_name=meal_form.cleaned_data.get('meal_name'),
-		)
-	else:
+	if not meal_form.is_valid() or not ingredient_formset.is_valid():
 		previous_page = request.META.get('HTTP_REFERER', '/')
 		return redirect(previous_page)
 
+	# Check that the user is the owner of the food items.
+	for form in ingredient_formset:
+		food_item_id = form.cleaned_data.get('food_item_id')
 
-	if ingredient_formset.is_valid():
-		for form in ingredient_formset:
-			food_item_id = form.cleaned_data.get('food_item_id')
-			food_item_name = form.cleaned_data.get('food_item_name')
-			quantity = form.cleaned_data.get('quantity')
-			unit = form.cleaned_data.get('unit')
-
-			if not food_item_id:
-				food_item = FoodItem.objects.create(
-					user=user,
-					food_item_name=food_item_name
-				)
-			else:
+		if food_item_id:
+			try:
 				food_item = FoodItem.objects.get(pk=food_item_id)
+			except:
+				return HttpResponseForbidden() # TODO: Perhaps a more suitable error code?
+			
+			if food_item.user != user:
+				return HttpResponseForbidden()
 
-			StandardIngredient.objects.create(
-				meal=meal,
-				food_item=food_item,
-				quantity=quantity,
-				unit=unit
+	# Create the meal
+	meal = Meal.objects.create(
+		user=user,
+		meal_name=meal_form.cleaned_data.get('meal_name'),
+	)
+
+	# Create the ingredients
+	for form in ingredient_formset:
+		food_item_id = form.cleaned_data.get('food_item_id')
+		food_item_name = form.cleaned_data.get('food_item_name')
+		quantity = form.cleaned_data.get('quantity')
+		unit = form.cleaned_data.get('unit')
+
+		# If the food_item does not already exist, create it.
+		if not food_item_id:
+			food_item = FoodItem.objects.create(
+				user=user,
+				food_item_name=food_item_name
 			)
+		else:
+			food_item = FoodItem.objects.get(pk=food_item_id)
 
-	else:
-		print('Ingredient formset not valid')
-		print(ingredient_formset.errors)
-	
+		StandardIngredient.objects.create(
+			meal=meal,
+			food_item=food_item,
+			quantity=quantity,
+			unit=unit
+		)
+
 	messages.success(request, f'Meal "{meal.meal_name}" has been created!')
 	return redirect(reverse('meals_item', args=[meal.id]))
 
