@@ -1,8 +1,10 @@
 from datetime import date, timedelta
 from decimal import Decimal
 from pprint import pprint
+from django.forms import formset_factory
 
 import pytest
+from meals.forms import StandardIngredientForm
 
 from meals.models import FoodItem, FoodPriceRecord, Meal, MealInstance, StandardIngredient
 
@@ -172,23 +174,112 @@ def test_meals_new_logged_out_user_redirected_to_homepage(client, user):
 	assert response.status_code == 302
 	assert response.url == '/'
 
-def test_meals_new_logged_in_user_creates_meal(client, user):
-	redirect_url = '/my_redirect_location/'
+def test_meals_new_logged_in_user_creates_meal_no_ingredients(client, user):
 	meal_name = 'Porridge'
 
 	client.force_login(user)
 	
 	assert Meal.objects.count() == 0
-	response = client.post('/meals/new/', {'meal_name': meal_name, 'redirect_location': redirect_url})
+	response = client.post('/meals/new/', {'meal_name': meal_name})
 	
 	assert Meal.objects.count() == 1
 	assert Meal.objects.first().meal_name == meal_name
 	assert response.status_code == 302
-	assert response.url == redirect_url
+
+
+	meal_id = Meal.objects.first().id
+	assert response.url == f'/meals/{meal_id}/'
 
 	# Create a second meal.
-	client.post('/meals/new/', {'meal_name': 'Toast', 'redirect_location': redirect_url})
+	response = client.post('/meals/new/', {'meal_name': 'Toast'})
 	assert Meal.objects.count() == 2
+	assert response.status_code == 302
+	
+	meal_id = Meal.objects.last().id
+	assert response.url == f'/meals/{meal_id}/'
+
+# Test that a meal can be created with existing food items.
+def tests_meals_create_with_existing_food_items(client, user):
+	# Create the existing food items
+	oats = FoodItem.objects.create(food_item_name='Oats', user=user)
+	milk = FoodItem.objects.create(food_item_name='Milk', user=user)
+	
+	post_data = {
+		'ingredient-TOTAL_FORMS': 2,
+		'ingredient-INITIAL_FORMS': 0,
+		'meal_name': 'Porridge',
+		'ingredient-0-food_item_id': oats.id,
+		'ingredient-0-quantity': 100,
+		'ingredient-0-unit': 'g',
+		'ingredient-1-food_item_id': milk.id,
+		'ingredient-1-quantity': 200,
+		'ingredient-1-unit': 'ml',
+	}
+
+	client.force_login(user)
+
+	client.post('/meals/new/', post_data)
+	assert Meal.objects.count() == 1
+	
+	porridge = Meal.objects.first()
+	assert porridge.meal_name == 'Porridge'
+
+	ingredients = porridge.standard_ingredients
+	assert len(ingredients) == 2
+
+	assert ingredients[0].food_item == oats
+	assert ingredients[0].quantity == 100
+	assert ingredients[0].unit == 'g'
+
+	assert ingredients[1].food_item == milk
+	assert ingredients[1].quantity == 200
+	assert ingredients[1].unit == 'ml'
+
+# Test that a meal can be created with new food items.
+def test_meals_create_with_new_food_items(client, user):
+	post_data = {
+		'ingredient-TOTAL_FORMS': 2,
+		'ingredient-INITIAL_FORMS': 0,
+		'meal_name': 'Porridge',
+		'ingredient-0-food_item_id': '', 
+		'ingredient-0-food_item_name': 'Oats',
+		'ingredient-0-quantity': 100,
+		'ingredient-0-unit': 'g',
+		'ingredient-1-food_item_id': '',
+		'ingredient-1-food_item_name': 'Milk',
+		'ingredient-1-quantity': 200,
+		'ingredient-1-unit': 'ml',
+	}
+
+	client.force_login(user)
+
+	client.post('/meals/new/', post_data)
+	assert Meal.objects.count() == 1
+	
+	porridge = Meal.objects.first()
+	assert porridge.meal_name == 'Porridge'
+
+	food_items = FoodItem.objects.all()
+	assert len(food_items) == 2
+
+	# Check that the food items have been created correctly.
+	oats = FoodItem.objects.get(food_item_name='Oats')
+	milk = FoodItem.objects.get(food_item_name='Milk')
+
+	assert oats.user == user
+	assert milk.user == user
+
+	ingredients = porridge.standard_ingredients
+	assert len(ingredients) == 2
+
+	assert ingredients[0].food_item == oats
+	assert ingredients[0].quantity == 100
+	assert ingredients[0].unit == 'g'
+
+	assert ingredients[1].food_item == milk
+	assert ingredients[1].quantity == 200
+	assert ingredients[1].unit == 'ml'
+
 	
 
 def test_meals_item_logged_out_user_redirected_to_homepage(client):

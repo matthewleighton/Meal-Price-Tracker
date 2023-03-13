@@ -195,7 +195,7 @@ def meals_new(request):
 
 	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
-
+	
 	StandardIngredientFormSet = formset_factory(StandardIngredientForm)
 	ingredient_formset = StandardIngredientFormSet(request.POST, request.FILES, prefix='ingredient')
 
@@ -207,13 +207,12 @@ def meals_new(request):
 			meal_name=meal_form.cleaned_data.get('meal_name'),
 		)
 	else:
-		print('meal form is not valid')
-		print(meal_form.errors)
-		exit() # TODO: handle this better
+		previous_page = request.META.get('HTTP_REFERER', '/')
+		return redirect(previous_page)
+
 
 	if ingredient_formset.is_valid():
 		for form in ingredient_formset:
-
 			food_item_id = form.cleaned_data.get('food_item_id')
 			food_item_name = form.cleaned_data.get('food_item_name')
 			quantity = form.cleaned_data.get('quantity')
@@ -227,21 +226,16 @@ def meals_new(request):
 			else:
 				food_item = FoodItem.objects.get(pk=food_item_id)
 
-			ingredient = StandardIngredient.objects.create(
+			StandardIngredient.objects.create(
 				meal=meal,
 				food_item=food_item,
 				quantity=quantity,
 				unit=unit
 			)
 
-			print('Created ingredient: ')
-			pprint(ingredient.__dict__)
-
 	else:
-		print('ingredient_formset is not valid')
+		print('Ingredient formset not valid')
 		print(ingredient_formset.errors)
-		print(ingredient_formset.management_form.errors)
-
 	
 	messages.success(request, f'Meal "{meal.meal_name}" has been created!')
 	return redirect(reverse('meals_item', args=[meal.id]))
@@ -259,8 +253,6 @@ def meals_item(request, meal_id):
 	if not meal.user == user:
 		return HttpResponseRedirect('/')
 	
-	pprint(standard_ingredients)
-
 	context = {
 		'meal': meal,
 		'standard_ingredients': standard_ingredients,
