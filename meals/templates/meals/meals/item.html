@@ -27,6 +27,24 @@
 	<p>You have no ingredients for this meal.</p>
 {% endif %}
 
+<button id="add-ingredient" class="btn btn-primary">Add Ingredient</button>
+
+
+{% if standard_ingredients_form %}
+	<form id="new-ingredient-form" action="{% url 'new_standard_ingredient' meal_id=meal.pk %}" method="POST" style="display:none;">
+		{% csrf_token %}
+		{{ standard_ingredients_form.as_p }}
+		<button type="submit" class="btn btn-primary">Save</button>
+	</form>
+{% endif %}
+
+<script>
+	document.getElementById('add-ingredient').addEventListener('click', function() {
+		document.getElementById('new-ingredient-form').style.display='block';
+	});
+</script>
+
+
 
 <h2>Times Cooked</h2>
 

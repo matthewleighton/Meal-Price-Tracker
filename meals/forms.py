@@ -1,3 +1,4 @@
+from pprint import pprint
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
@@ -82,7 +83,6 @@ class FoodPriceRecordForm(forms.ModelForm):
 class StandardIngredientForm(forms.ModelForm):
 	class Meta:
 		model = StandardIngredient
-		# fields = ['quantity', 'unit', 'food_item_name', 'food_item_id']
 		fields = ['quantity', 'unit']
 
 	food_item_name = forms.CharField(max_length=50, label="Food Item Name", required=False)
@@ -90,26 +90,11 @@ class StandardIngredientForm(forms.ModelForm):
 
 	field_order = ['food_item_name', 'food_item_id', 'quantity', 'unit']
 
-
-		# widgets = {
-		# 	'food_item': autocomplete.ModelSelect2(
-		# 		url='food_item_autocomplete',
-		# 		attrs={
-		# 			'data-placeholder': 'Ingredient Name',
-		# 			'data-minimum-input-length': 1,
-		# 			'data-trigger-dropdown': 'false'
-		# 		}
-		# 	)
-		# }
-
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		# self.fields['meal'].widget = forms.HiddenInput()
-		# self.fields['food_item'].widget = forms.HiddenInput()
 
 		self.helper = FormHelper()
 		self.helper.layout = Layout(
-			# 'meal',
 			'food_item',
 			'quantity',
 			'unit',
@@ -117,3 +102,38 @@ class StandardIngredientForm(forms.ModelForm):
 		)
 		self.helper.form_method = 'POST'
 		self.helper.form_class = 'form-horizontal'
+
+	def clean(self):
+		cleaned_data = super().clean()
+
+		food_item_name = cleaned_data.get('food_item_name')
+		food_item_id = cleaned_data.get('food_item_id')
+
+		if not food_item_name and not food_item_id:
+			raise forms.ValidationError('Please select an existing food item or enter a new one')
+		
+		return cleaned_data
+
+	def save(self, meal, user, commit=True):
+		instance = super().save(commit=False)
+
+		food_item_id = self.cleaned_data.get('food_item_id')
+		food_item_name = self.cleaned_data.get('food_item_name')
+
+		if food_item_id:
+			food_item = FoodItem.objects.get(id=food_item_id)
+		elif food_item_name:
+			food_item = FoodItem.objects.create(
+				food_item_name=food_item_name,
+				user=user
+			)
+		else:
+			raise forms.ValidationError('Please select an existing food item or enter a new one')
+
+		instance.food_item = food_item
+		instance.meal = meal
+
+		if commit:
+			instance.save()
+
+		return instance

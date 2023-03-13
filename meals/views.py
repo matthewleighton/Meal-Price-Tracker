@@ -265,7 +265,6 @@ def meals_item(request, meal_id):
 		return HttpResponseRedirect('/')
 	
 	meal = get_object_or_404(Meal, pk=meal_id)
-
 	standard_ingredients = StandardIngredient.objects.filter(meal=meal)
 
 	if not meal.user == user:
@@ -275,6 +274,7 @@ def meals_item(request, meal_id):
 		'meal': meal,
 		'standard_ingredients': standard_ingredients,
 		'meal_instances': meal.meal_instances,
+		'standard_ingredients_form': StandardIngredientForm(),
 	}
 
 	return render(request, 'meals/meals/item.html', context)
@@ -297,6 +297,35 @@ def meals_item_delete(request, meal_id):
 ##############################################################################
 #--------------------------------- Ingredient -------------------------------#
 ##############################################################################
+
+def new_standard_ingredient(request, meal_id):
+	user = request.user
+
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
+
+	meal = get_object_or_404(Meal, pk=meal_id)
+
+	if not meal.user == user:
+		return HttpResponseForbidden()
+		
+	if request.method == 'POST':
+		form = StandardIngredientForm(request.POST)
+		# form.set_meal(meal)
+
+		if form.is_valid():
+			form.save(meal=meal, user=user)
+			return redirect(reverse('meals_item', args=[meal_id]))
+		
+	else:
+		form = StandardIngredientForm()
+
+	context = {}
+
+	return render(request, 'meals/ingredient/new.html', context)
+
+
+
 
 def ingredient_delete(request, ingredient_id):
 	user = request.user
