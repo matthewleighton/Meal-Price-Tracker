@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.forms import formset_factory
+from django.views.decorators.http import require_http_methods
 
 
 from dal import autocomplete
@@ -233,17 +234,20 @@ def meals_new(request):
 	for form in ingredient_formset:
 		food_item_id = form.cleaned_data.get('food_item_id')
 		food_item_name = form.cleaned_data.get('food_item_name')
+
 		quantity = form.cleaned_data.get('quantity')
 		unit = form.cleaned_data.get('unit')
 
 		# If the food_item does not already exist, create it.
-		if not food_item_id:
+		if not food_item_id and food_item_name:
 			food_item = FoodItem.objects.create(
 				user=user,
 				food_item_name=food_item_name
 			)
-		else:
+		elif food_item_id:
 			food_item = FoodItem.objects.get(pk=food_item_id)
+		else:
+			continue
 
 		StandardIngredient.objects.create(
 			meal=meal,
@@ -254,7 +258,6 @@ def meals_new(request):
 
 	messages.success(request, f'Meal "{meal.meal_name}" has been created!')
 	return redirect(reverse('meals_item', args=[meal.id]))
-
 
 def meals_item(request, meal_id):
 	user = request.user
@@ -275,3 +278,43 @@ def meals_item(request, meal_id):
 	}
 
 	return render(request, 'meals/meals/item.html', context)
+
+def meals_item_delete(request, meal_id):
+	user = request.user
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
+	
+	meal = get_object_or_404(Meal, pk=meal_id)
+
+	if not meal.user == user:
+		return HttpResponseForbidden()
+
+	meal.delete()
+	
+	previous_page = request.META.get('HTTP_REFERER', '/')
+	return redirect(previous_page)
+
+##############################################################################
+#--------------------------------- Ingredient -------------------------------#
+##############################################################################
+
+def ingredient_delete(request, ingredient_id):
+	user = request.user
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
+	
+	ingredient = get_object_or_404(StandardIngredient, pk=ingredient_id)
+
+	if not ingredient.meal.user == user:
+		return HttpResponseForbidden()
+
+	ingredient.delete()
+
+	meal_name = ingredient.meal
+	food_item_name = ingredient.food_item.food_item_name
+
+	message = f'{meal_name} ingredient "{food_item_name}" has been deleted!'
+	messages.success(request, message)
+
+	previous_page = request.META.get('HTTP_REFERER', '/')
+	return redirect(previous_page)

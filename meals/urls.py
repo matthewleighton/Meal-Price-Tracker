@@ -11,10 +11,12 @@ urlpatterns = [
 	path('meals/', views.meals_list, name='meals_list'),
 	path('meals/new/', views.meals_new, name='meals_new'),
 	path('meals/<int:meal_id>/', views.meals_item, name='meals_item'),
+    path('meals/<int:meal_id>/delete/', views.meals_item_delete, name='meals_item_delete'),
 
 	path('ingredients/', views.food_item_list, name='food_item_list'),
 	path('ingredients/new/', views.new_food_item, name='new_food_item'),
 	path('ingredients/<int:food_item_id>/', views.food_item, name='food_item'),
+    path('ingredients/<int:ingredient_id>/delete/', views.ingredient_delete, name='ingredient_delete'),
     
 	# re_path(
 	# 	r'^ingredients/autocomplete/$',
