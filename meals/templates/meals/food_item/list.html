@@ -3,11 +3,26 @@
 {% block content %}
 	<h2>My Food Items</h2>
 
-	<ul>
+	<table class="table sortable table-stripped">
+		<tr>
+			<th>Food Item</th>
+			<th># Meals</th>
+			<th>Price</th>
+			<th># Purchases</th>
+		</tr>
 		{% for food_item in food_items %}
-			<li><a href="{% url 'food_item' food_item.id %}">{{ food_item.food_item_name }}</a></li>
+			<tr>
+				<td>
+					<a href="{% url 'food_item' food_item_id=food_item.pk %}">
+						{{ food_item.food_item_name }}
+					</a>
+				</td>
+				<td>{{ food_item.meals|length }}</td>
+				<td>TODO</td>
+				<td>{{ food_item.purchases|length }}</td>
+			</tr>
 		{% endfor %}
-	</ul>
+	</table>
 
 	<h2>Add New Food Item</h2>
 

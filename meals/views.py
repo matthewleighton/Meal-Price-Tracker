@@ -38,7 +38,7 @@ def food_item_list(request):
 	if not user.is_authenticated:
 		return redirect('/')
 
-	food_items = FoodItem.objects.filter(user=user)
+	food_items = FoodItem.objects.filter(user=user).order_by('food_item_name')
 	form = FoodItemForm()
 
 	context = {

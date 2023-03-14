@@ -103,6 +103,10 @@ class FoodItem(models.Model):
 		return Meal.objects.filter(
 			models.Q(standardingredient__food_item=self)
 		)
+	
+	@property
+	def purchases(self):
+		return FoodPriceRecord.objects.filter(food_item=self)
 
 # This describes an instance of a FoodItem being purchased.
 # We can use this to track the price of a FoodItem over time.
