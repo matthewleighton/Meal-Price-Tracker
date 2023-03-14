@@ -3,13 +3,55 @@
 {% block content %}
 	<h1>Meal Diary</h1>
 
-	<ul>
+
+	<table class="table sortable table-stripped">
+		<tr>
+			<th>Meal</th>
+			<th>Date</th>
+			<th>Rating</th>
+			<th>Time</th>
+			<th></th>
+		</tr>
 		{% for instance in meal_instances %}
-			<li> 
-				<a href="{% url 'meals_item' meal_id=instance.meal.pk %}">
-					{{ instance.meal.meal_name }}:
-				</a> {{ instance.list_format }}
-			</li>
+			<tr>
+				<td>
+					<a href="{% url 'meals_item' meal_id=instance.meal.pk %}">
+						{{ instance.meal.meal_name }}
+					</a>
+				</td>
+				<td>{{ instance.date }}</td>
+				<td>{{ instance.format_rating }}</td>
+				<td>{{ instance.format_cook_time }}</td>
+				<td>
+					<a href="{% url 'meal_instance_delete' meal_instance_id=instance.pk %}" 
+					   class="btn btn-danger"
+					   onclick="return confirm('Are you sure you want to delete this meal instance?')">Delete</a>
+				</td>
+			</tr>
 		{% endfor %}
-	</ul>
+	</table>
+
+	{% if meal_instance_form %}
+		<button id="add-meal-instance-btn" class="btn btn-primary">Add Time Cooked</button>
+	
+		<form id="meal-instance-form" action="{% url 'new_meal_instance' %}" method="POST" style="display:none;">
+			{% csrf_token %}
+			{{ meal_instance_form.as_p }}
+			<button type="submit" class="btn btn-success">Save Time Cooked</button>
+			<button id="cancel-meal-instance-btn" type="button" class="btn btn-danger">Cancel</button>
+		</form>
+
+		<script>
+			document.getElementById('add-meal-instance-btn').addEventListener('click', function() {
+				document.getElementById('meal-instance-form').style.display='block';
+				document.getElementById('add-meal-instance-btn').style.display='none';
+			});
+	
+			document.getElementById('cancel-meal-instance-btn').addEventListener('click', function() {
+				document.getElementById('meal-instance-form').style.display='none';
+				document.getElementById('add-meal-instance-btn').style.display='block';
+			});
+		</script>
+	{% endif %}
+
 {% endblock %}

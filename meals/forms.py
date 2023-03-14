@@ -1,3 +1,4 @@
+from datetime import date
 from pprint import pprint
 from django import forms
 from crispy_forms.helper import FormHelper
@@ -23,6 +24,13 @@ class MealInstanceForm(forms.ModelForm):
 			'date': forms.DateInput(attrs={'type': 'date'})
 		}
 
+	def __init__(self, user, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+		self.fields['meal'].queryset = Meal.objects.filter(user=user)
+		self.initial['date'] = date.today()
+		
+
 
 class FoodItemForm(forms.ModelForm):
 	class Meta:
@@ -38,16 +46,20 @@ class FoodPriceRecordForm(forms.ModelForm):
 		fields = ['food_item', 'new_food_item', 'price_amount', 'currency', 'quantity', 'unit', 'location', 'date']
 
 		widgets = {
-			'date': forms.DateInput(attrs={'type': 'date'})
+			'date': forms.DateInput(attrs={
+				'type': 'date',
+			})
 		}
 
-	# We add a request object to the form so that we can access the user when we save the form.
 	def __init__(self, *args, **kwargs):
-		self.request = kwargs.pop('request', None)
-
+		self.user = kwargs.pop('user', None)
 		super().__init__(*args, **kwargs)
+
+		self.fields['food_item'].queryset = FoodItem.objects.filter(user=self.user)
+
 		self.fields['food_item'].required = False
 		self.fields['food_item'].required = False
+		self.initial['date'] = date.today()
 
 	# We add a validation check to ensure that either an existing food item or a new food item is given.
 	def clean(self):
@@ -70,7 +82,7 @@ class FoodPriceRecordForm(forms.ModelForm):
 		if not food_item and new_food_item:
 			food_item = FoodItem.objects.create(
 				food_item_name=new_food_item,
-				user=self.request.user
+				user=self.user
 			)
 
 		instance.food_item = food_item

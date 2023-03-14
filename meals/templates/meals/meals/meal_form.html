@@ -1,4 +1,5 @@
-<form action="{% url 'meals_new' %}" method="POST">
+<form id="new-meal-form" action="{% url 'meals_new' %}" method="POST">
+	<h3>New Meal</h3>
 	{% csrf_token %}
 	<p>Meal Name: {{ meal_form.meal_name }}</p>
 	
@@ -17,16 +18,16 @@
 
 	<div id="empty-ingredient-form" style="display:none">
 		{{ ingredient_formset.empty_form.as_p }}
-		<button type="button" onclick="deleteIngredientForm('__prefix__')">Delete</button>
+		<button type="button" onclick="deleteIngredientForm('__prefix__')" class="btn btn-danger">Delete</button>
 		<hr/>
 	</div>
 
 	<br/>
-	<button type="button" onclick=addIngredientForm()>Add Ingredient</button>
+	<button type="button" onclick=addIngredientForm() class="btn btn-primary">Add Ingredient</button>
 
 	<input type="hidden" name="redirect_location" value="{{ request.path }}">
 
-	<button type="submit">Submit</button>
+	<button type="submit" class="btn btn-success">Create Meal</button>
 </form>
 
 <script>

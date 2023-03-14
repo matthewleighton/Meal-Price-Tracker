@@ -69,9 +69,18 @@ class Meal(models.Model):
 			self.get_newest_ingredient_price(ingredient) for ingredient in self.standard_ingredients
 		])
 
+	# Return the quantity of a food item required for the meal.
+	# If the food item is not used in the meal, return 0.
+	def get_food_item_quantity(self, food_item):
+		ingredient = StandardIngredient.objects.filter(meal=self, food_item=food_item)
+
+		if not ingredient.exists():
+			return 0
 		
+		quantity = ingredient[0].quantity
+		unit = ingredient[0].unit
 
-
+		return f'{quantity} {unit}'
 
 
 
@@ -125,6 +134,12 @@ class FoodPriceRecord(models.Model):
 	currency = models.CharField('Currency', 
 								max_length=3, 
 								validators=[MealValidators.is_valid_currency])
+	
+	def format_price(self):
+		return f'{self.price_amount} {self.currency}'
+	
+	def format_quantity(self):
+		return f'{self.quantity} {self.unit}'
 
 # A Meal is made up of a collection of StandardIngredients.
 class StandardIngredient(models.Model):
@@ -145,6 +160,9 @@ class StandardIngredient(models.Model):
 	unit = models.CharField('Unit',
 							max_length=20,
 							validators=[MealValidators.is_valid_unit])
+	
+	def format_quantity(self):
+		return f'{self.quantity} {self.unit}'
 
 # This describes a particular time when a Meal was made.
 class MealInstance(models.Model):
@@ -162,3 +180,9 @@ class MealInstance(models.Model):
 	def list_format(self):
 		date_string = self.date.strftime('%m/%d/%Y')
 		return f'{date_string} | {self.rating}/5 stars | {self.cook_time} minutes cooking time'
+	
+	def format_cook_time(self):
+		return f'{self.cook_time} minutes'
+	
+	def format_rating(self):
+		return f'{self.rating}/5 stars'

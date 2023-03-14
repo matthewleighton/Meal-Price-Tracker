@@ -4,16 +4,56 @@
 {% block content %}
 	<h1>My Meals</h1>
 
-	<ul>
+	<table class="table sortable table-stripped">
+		<tr>
+			<th>Meal</th>
+			<th>Times Cooked</th>
+			<th>Price</th>
+			<th># Ingredients</th>
+			<th>Avg Cook Time</th>
+			<th></th>
+		</tr>
 		{% for meal in meals %}
-			<li><a href="{% url 'meals_item' meal.id %}">{{ meal.meal_name }}</a></li>
+			<tr>
+				<td><a href="{% url 'meals_item' meal_id=meal.pk %}">{{ meal.meal_name }}</a></td>
+				<td>{{ meal.meal_instances|length }}</td>
+				<td>TODO</td>
+				<td>{{ meal.standard_ingredients|length }}</td>
+				<td>TODO</td>
+				<td>
+					<a href="{% url 'meals_item_delete' meal_id=meal.pk %}" 
+					   class="btn btn-danger"
+					   onclick="return confirm('Are you sure you want to delete this meal?')">Delete</a>
+				</td>
+			</tr>
 		{% endfor %}
-	</ul>
+	</table>
 
-	<hr>
+<button id="new-meal-btn" class="btn btn-primary">New Meal</button>
 
-	<h2>New Meal</h2>
+{% include 'meals/meals/meal_form.html' %}
 
-	{% include 'meals/meals/meal_form.html' %}
+<button id="cancel-meal-btn" class="btn btn-danger" style="display: none;">Cancel</button>
+
+<script>
+	document.getElementById('new-meal-btn').addEventListener('click', function() {
+		document.getElementById('new-meal-form').style.display='block';
+		document.getElementById('new-meal-btn').style.display='none';
+		document.getElementById('cancel-meal-btn').style.display='block';
+
+	});
+
+	document.getElementById('cancel-meal-btn').addEventListener('click', function() {
+		document.getElementById('new-meal-form').style.display='none';
+		document.getElementById('new-meal-btn').style.display='block';
+		document.getElementById('cancel-meal-btn').style.display='none';
+	});
+</script>
+
+<style>
+	#new-meal-form {
+		display: none;
+	}
+</style>
 
 {% endblock content %}

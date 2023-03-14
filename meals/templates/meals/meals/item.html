@@ -4,66 +4,130 @@
 
 <h1>Meal: {{ meal.meal_name }}</h1>
 
-<h2>Ingredients</h2>
+<h2>Ingredients: {{ standard_ingredients|length }}</h2>
 {% if standard_ingredients %}
-	<ul>
+	<table class="table sortable table-stripped">
+		<tr>
+			<th>Ingredient</th>
+			<th>Quantity</th>
+			<th>Price</th>
+			<th></th>
+			<th></th>
+		</tr>
 		{% for ingredient in standard_ingredients %}
-			<li>
-				{{ ingredient.quantity }} {{ ingredient.unit }} 
-				<a href="{% url 'food_item' food_item_id=ingredient.food_item.pk %}">
-					{{ ingredient.food_item.food_item_name }}
-				</a> | 
-				<form action="{% url 'ingredient_delete' ingredient_id=ingredient.pk %}" method="POST" style="display:inline">
-					{% csrf_token %}
-					<input type="hidden" name="_method" value="DELETE">
-					<button type="submit" class="btn btn-danger btn-sm">
-						Delete
-					</button>
-				</form>
-			</li>
+			<tr>
+				<td>
+					<a href="{% url 'food_item' food_item_id=ingredient.food_item.pk %}">
+						{{ ingredient.food_item.food_item_name }}
+					</a>
+				</td>
+				<td>{{ ingredient.format_quantity }}</td>
+				<td>{{ ingredient.food_item.price }}</td>
+				<td>
+					<form action="">
+						<button type="submit" class="btn btn-primary btn-sm">
+							Edit
+						</button>
+					</form>
+				</td>
+				<td>
+					<form action="{% url 'ingredient_delete' ingredient_id=ingredient.pk %}" method="POST" style="display:inline">
+						{% csrf_token %}
+						<input type="hidden" name="_method" value="DELETE">
+						<button type="submit" class="btn btn-danger btn-sm">
+							Delete
+						</button>
+					</form>
+				</td>
+			</tr>
 		{% endfor %}
-	</ul>
+	</table>
 {% else %}
 	<p>You have no ingredients for this meal.</p>
 {% endif %}
 
-<button id="add-ingredient" class="btn btn-primary">Add Ingredient</button>
-
+<button id="add-ingredient-btn" class="btn btn-primary">Add Ingredient</button>
 
 {% if standard_ingredients_form %}
 	<form id="new-ingredient-form" action="{% url 'new_standard_ingredient' meal_id=meal.pk %}" method="POST" style="display:none;">
 		{% csrf_token %}
 		{{ standard_ingredients_form.as_p }}
-		<button type="submit" class="btn btn-primary">Save</button>
+		<button type="submit" class="btn btn-success">Save Ingredient</button>
+		<button id="cancel-new-ingredient-btn" type="button" class="btn btn-danger">Cancel</button>
+	</form>
+{% endif %}
+
+<hr>
+
+<h2>Times Cooked: {{ meal.meal_instances|length }}</h2>
+
+{% if meal.meal_instances|length %}
+	
+	<table class="table sortable table-stripped">
+		<tr>
+			<th>Date</th>
+			<th>Rating</th>
+			<th>Time</th>
+			<th></th>
+			<th></th>
+		</tr>
+		{% for instance in meal_instances %}
+			<tr>
+				<td>{{ instance.date }}</td>
+				<td>{{ instance.format_rating }}</td>
+				<td>{{ instance.format_cook_time }}</td>
+				<td>
+					<form action="">
+						<button type="submit" class="btn btn-primary btn-sm">
+							Edit
+						</button>
+					</form>
+				</td>
+				<td>
+					<form action="{% url 'meal_instance_delete' meal_instance_id=instance.pk %}" method="POST" style="display:inline">
+						{% csrf_token %}
+						<input type="hidden" name="_method" value="DELETE">
+						<button type="submit" class="btn btn-danger btn-sm">
+							Delete
+						</button>
+					</form>
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endif %}
+
+<button id="add-meal-instance-btn" class="btn btn-primary">Add Time Cooked</button>
+
+{% if meal_instance_form %}
+	<form id="meal-instance-form" action="{% url 'new_meal_instance' %}" method="POST" style="display:none;">
+		{% csrf_token %}
+		{{ meal_instance_form.as_p }}
+		<button type="submit" class="btn btn-success">Save Time Cooked</button>
+		<button id="cancel-meal-instance-btn" type="button" class="btn btn-danger">Cancel</button>
 	</form>
 {% endif %}
 
 <script>
-	document.getElementById('add-ingredient').addEventListener('click', function() {
+	document.getElementById('add-ingredient-btn').addEventListener('click', function() {
 		document.getElementById('new-ingredient-form').style.display='block';
+		document.getElementById('add-ingredient-btn').style.display='none';
+	});
+
+	document.getElementById('cancel-new-ingredient-btn').addEventListener('click', function() {
+		document.getElementById('new-ingredient-form').style.display='none';
+		document.getElementById('add-ingredient-btn').style.display='block';
+	});
+
+	document.getElementById('add-meal-instance-btn').addEventListener('click', function() {
+		document.getElementById('meal-instance-form').style.display='block';
+		document.getElementById('add-meal-instance-btn').style.display='none';
+	});
+
+	document.getElementById('cancel-meal-instance-btn').addEventListener('click', function() {
+		document.getElementById('meal-instance-form').style.display='none';
+		document.getElementById('add-meal-instance-btn').style.display='block';
 	});
 </script>
-
-<hr>
-
-<h2>Times Cooked</h2>
-
-{% if meal.meal_instances|length %}
-	<ul>
-		{% for instance in meal_instances %}
-			<li>{{ instance.list_format }}</li>
-		{% endfor %}
-	</ul>
-{% else %}
-	You have never cooked this meal.
-{% endif %}
-
-<form action="{% url 'new_meal_instance' %}" method="post">
-	{% csrf_token %}
-	{{ meal_instance_form.as_p }}
-	<button type="submit" class="btn btn-primary">Add Time Cooked</button>
-</form>
-
-
 
 {% endblock %}

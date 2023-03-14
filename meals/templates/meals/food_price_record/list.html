@@ -1,15 +1,65 @@
 {% extends '../base.html' %}
 
 {% block content %}
-	<h1>Food Purchase Diary</h1>
+	<h1>Food Purchases</h1>
 
-	{{ form.as_p }}
+	<table class="table sortable table-stripped">
+		<tr>
+			<th>Ingredient</th>
+			<th>Quantity</th>
+			<th>Price</th>
+			<th>Location</th>
+			<th>Date</th>
+		</tr>
+		{% for purchase in price_records %}
+			<tr>
+				<td>
+					<a href="{% url 'food_item' food_item_id=purchase.food_item.pk %}">
+						{{ purchase.food_item.food_item_name }}
+					</a>
+				</td>
+				<td>{{ purchase.format_quantity }}</td>
+				<td>{{ purchase.format_price }}</td>
+				<td>{{ purchase.location }}</td>
+				<td>{{ purchase.date }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+
+	{% if food_price_record_form %}
+
+		TODO: This HTML is also in the food_item/info.html template.  Refactor to a template fragment.
+
+		<button id="add-purchase-btn" class="btn btn-primary">Add Purchase</button>
+
+		<form id="new-purchase-form" action="{% url 'new_purchase' %}" method="POST" style="display:none;">
+			{% csrf_token %}
+			{{ food_price_record_form.as_p }}
+			<button type="submit" class="btn btn-success">Save Purchase</button>
+			<button id="cancel-purchase-btn" type="button" class="btn btn-danger">Cancel</button>
+		</form>
+
+	{% endif %}
+
+	<script>
+		document.getElementById('add-purchase-btn').addEventListener('click', function() {
+			document.getElementById('new-purchase-form').style.display='block';
+			document.getElementById('add-purchase-btn').style.display='none';
+		});
+
+		document.getElementById('cancel-purchase-btn').addEventListener('click', function() {
+			document.getElementById('new-purchase-form').style.display='none';
+			document.getElementById('add-purchase-btn').style.display='block';
+		});
+	</script>
+
+	
 
 	<br><br>
-
+{% comment %} 
 	<ul>
 		{% for purchase in price_records %}
 			<li>{{ purchase }}</li>
 		{% endfor %}
-	</ul>
+	</ul> {% endcomment %}
 {% endblock  %}

@@ -50,15 +50,28 @@ def food_item_list(request):
 
 # View a single food item.
 def food_item(request, food_item_id):
-	food_item = get_object_or_404(FoodItem, pk=food_item_id)
-	price_records = FoodPriceRecord.objects.filter(food_item=food_item)
+	user = request.user
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
 	
+	food_item = get_object_or_404(FoodItem, pk=food_item_id)
+
+	if food_item.user != user:
+		return HttpResponseForbidden()
+
+	price_records = FoodPriceRecord.objects.filter(food_item=food_item)
+
+	food_price_record_form = FoodPriceRecordForm(initial={'food_item': food_item}, user=user)
+	food_price_record_form.fields['food_item'].widget = forms.HiddenInput()
+	food_price_record_form.fields['new_food_item'].widget = forms.HiddenInput()
+
 	meals = food_item.meals
 
 	context = {
 		'food_item': food_item,
+		'meals': meals,
 		'price_records': price_records,
-		'meals': meals
+		'food_price_record_form': food_price_record_form
 	}
 
 	return render(request, 'meals/food_item/info.html', context)
@@ -109,30 +122,35 @@ def price_record_list(request):
 	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
 
-	price_records = FoodPriceRecord.objects.filter(food_item__user__exact=user)
+	price_records = FoodPriceRecord.objects.filter(food_item__user__exact=user).order_by('-date')
 
-	form = FoodPriceRecordForm()
+	food_price_record_form = FoodPriceRecordForm(user=user)
+
 
 	context = {
-		'form': form,
+		'food_price_record_form': food_price_record_form,
 		'price_records': price_records
 	}
 
 	return render(request, 'meals/food_price_record/list.html', context=context)
 
 def new_food_price_record(request):
-	if not request.user.is_authenticated:
+	user = request.user
+
+	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
 	
 	if request.method == 'POST':
-		form = FoodPriceRecordForm(request.POST, request=request)
+		form = FoodPriceRecordForm(request.POST, user=user)
 
 		if form.is_valid():
 			form.save()
-			return redirect('/')
+			
+			previous_page = request.META.get('HTTP_REFERER', '/')
+			return redirect(previous_page)
 
 	else:
-		form = FoodPriceRecordForm()
+		form = FoodPriceRecordForm(user=user)
 
 	context = {'form': form}
 
@@ -149,32 +167,52 @@ def meal_instance_list(request):
 
 	meal_instances = MealInstance.objects.filter(meal__user__exact=user).order_by('-date')
 
+	meal_instance_form = MealInstanceForm(user=user)
+
 	context = {
 		'user': user,
-		'meal_instances': meal_instances
+		'meal_instances': meal_instances,
+		'meal_instance_form': meal_instance_form
 	}
 
 	return render(request, 'meals/meal_instance/list.html', context)
 
 def new_meal_instance(request):
-	if not request.user.is_authenticated:
+	user = request.user
+	if not user.is_authenticated:
 		return redirect('/')
 
 	if request.method == 'POST':
-		form = MealInstanceForm(request.POST)
+		form = MealInstanceForm(user, request.POST)
 
 		if form.is_valid():
 			meal_instance = form.save()
-			redirect_location = request.POST.get('redirect_location', '/')
-			return HttpResponseRedirect(redirect_location)
+			previous_page = request.META.get('HTTP_REFERER', '/')
+			return HttpResponseRedirect(previous_page)
 	else:
-		form = MealInstanceForm()	
+		form = MealInstanceForm(user=user)	
 
 	context = {
 		'form': form
 	}
 
 	return render(request, 'meals/meal_instance/new.html', context)
+
+# Delete a meal instance, specified by its ID.
+def meal_instance_delete(request, meal_instance_id):
+	user = request.user
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
+
+	meal_instance = get_object_or_404(MealInstance, pk=meal_instance_id)
+
+	if not meal_instance.meal.user == user:
+		return HttpResponseForbidden()
+	
+	meal_instance.delete()
+
+	previous_page = request.META.get('HTTP_REFERER', '/')
+	return redirect(previous_page)
 
 ##############################################################################
 #------------------------------------ Meal ----------------------------------#
@@ -272,7 +310,7 @@ def meals_item(request, meal_id):
 	
 	standard_ingredients = StandardIngredient.objects.filter(meal=meal)
 	
-	meal_instance_form = MealInstanceForm(initial={'meal': meal})
+	meal_instance_form = MealInstanceForm(initial={'meal': meal}, user=user)
 	meal_instance_form.fields['meal'].widget = forms.HiddenInput()
 	
 	context = {

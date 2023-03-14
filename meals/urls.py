@@ -30,7 +30,8 @@ urlpatterns = [
 	path('purchases/new/', views.new_food_price_record, name='new_purchase'),
 
 	path('meal_instances/', views.meal_instance_list, name='meal_instance_list'),
-	path('meal_instances/new/', views.new_meal_instance, name='new_meal_instance')
+	path('meal_instances/new/', views.new_meal_instance, name='new_meal_instance'),
+	path('meal_instances/<int:meal_instance_id>/delete', views.meal_instance_delete, name='meal_instance_delete'),
     
 
 
