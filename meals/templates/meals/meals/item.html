@@ -44,7 +44,7 @@
 	});
 </script>
 
-
+<hr>
 
 <h2>Times Cooked</h2>
 
@@ -57,5 +57,13 @@
 {% else %}
 	You have never cooked this meal.
 {% endif %}
+
+<form action="{% url 'new_meal_instance' %}" method="post">
+	{% csrf_token %}
+	{{ meal_instance_form.as_p }}
+	<button type="submit" class="btn btn-primary">Add Time Cooked</button>
+</form>
+
+
 
 {% endblock %}

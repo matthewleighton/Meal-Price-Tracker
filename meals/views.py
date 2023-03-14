@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
@@ -265,16 +266,21 @@ def meals_item(request, meal_id):
 		return HttpResponseRedirect('/')
 	
 	meal = get_object_or_404(Meal, pk=meal_id)
-	standard_ingredients = StandardIngredient.objects.filter(meal=meal)
-
+	
 	if not meal.user == user:
 		return HttpResponseRedirect('/')
+	
+	standard_ingredients = StandardIngredient.objects.filter(meal=meal)
+	
+	meal_instance_form = MealInstanceForm(initial={'meal': meal})
+	meal_instance_form.fields['meal'].widget = forms.HiddenInput()
 	
 	context = {
 		'meal': meal,
 		'standard_ingredients': standard_ingredients,
 		'meal_instances': meal.meal_instances,
 		'standard_ingredients_form': StandardIngredientForm(),
+		'meal_instance_form': meal_instance_form
 	}
 
 	return render(request, 'meals/meals/item.html', context)
