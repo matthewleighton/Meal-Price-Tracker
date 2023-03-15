@@ -9,7 +9,9 @@ from crispy_forms.layout import Layout, Submit
 from dal import autocomplete
 
 from .models import FoodItem, FoodPriceRecord, Meal, MealInstance, StandardIngredient
-from .models import UserDuplicateFoodItemError
+# from .models import UserDuplicateFoodItemError
+
+from meals.models.food_item import UserDuplicateFoodItemError
 
 
 class MealForm(forms.ModelForm):
