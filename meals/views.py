@@ -39,7 +39,7 @@ def food_item_list(request):
 		return redirect('/')
 
 	food_items = FoodItem.objects.filter(user=user).order_by('food_item_name')
-	form = FoodItemForm()
+	form = FoodItemForm(user=user, request=request)
 
 	context = {
 		'form': form,
@@ -77,22 +77,25 @@ def food_item(request, food_item_id):
 	return render(request, 'meals/food_item/info.html', context)
 
 # Create a new food item.
+@require_http_methods(['POST'])
 def new_food_item(request):
-	if request.method == 'POST':
-		form = FoodItemForm(request.POST)
+	user = request.user
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
 
-		if form.is_valid():
-			food_item = form.save(commit=False)
-			food_item.user = request.user
-			food_item.save()
+	if request.method == 'POST':
+		food_item_form = FoodItemForm(request.POST, user=user, request=request)
+
+		if food_item_form.is_valid():
+			food_item_form.save(commit=True)
 
 			next = request.POST.get('next', '/')
 			return HttpResponseRedirect(next)
 
 	else:
-		form = FoodItemForm()
+		food_item_form = FoodItemForm(user=user, request=request)
 
-	context = {'form': form}
+	context = {'form': food_item_form}
 	
 
 	return render(request, 'meals/food_item/new.html', context)

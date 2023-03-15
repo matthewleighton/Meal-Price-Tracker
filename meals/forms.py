@@ -1,12 +1,15 @@
 from datetime import date
 from pprint import pprint
 from django import forms
+from django.contrib import messages
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 
 from dal import autocomplete
 
 from .models import FoodItem, FoodPriceRecord, Meal, MealInstance, StandardIngredient
+from .models import UserDuplicateFoodItemError
 
 
 class MealForm(forms.ModelForm):
@@ -36,6 +39,43 @@ class FoodItemForm(forms.ModelForm):
 	class Meta:
 		model = FoodItem
 		fields = ['food_item_name']
+
+	def __init__(self, *args, **kwargs):
+		self.user    = kwargs.pop('user', None)
+		self.request = kwargs.pop('request', None) # Needed for passing messages.
+		
+		if self.user is None:
+			raise ValueError('User must be provided to the FoodItemForm.')
+		
+		super().__init__(*args, **kwargs)
+
+	def save(self, commit=True):
+		food_item = super().save(commit=False)
+		food_item.user = self.user
+
+		if commit:
+			try:
+				food_item.save()
+
+			# If the user already has a food item with the same name, return that food item.
+			except UserDuplicateFoodItemError as e:
+				
+				if self.request: # We can only pass the message if the request is provided.
+					messages.warning(
+						self.request,
+						f'Food item "{food_item.food_item_name}" already exists.'
+					)
+
+				return FoodItem.objects.filter(
+					food_item_name__iexact=food_item.food_item_name,
+					user=self.user
+				).first()
+
+		return food_item
+
+		
+
+	
 
 
 class FoodPriceRecordForm(forms.ModelForm):
