@@ -1,3 +1,4 @@
+from pprint import pprint
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
@@ -15,6 +16,23 @@ class FoodItem(models.Model):
 		return self.food_item_name
 	
 	def save(self, *args, **kwargs):
+		
+		# TODO: These should perhaps be moved to the clean() function.
+		# But the problem is that the user is not available then, when we're
+		# running form.is_valid() in the view.
+		self.check_valid_name()
+		self.check_for_duplicate()
+
+		self.food_item_name = self.food_item_name.title()
+
+		super().save(*args, **kwargs)
+
+	def check_valid_name(self):
+		if not self.food_item_name:
+			raise ValidationError('Food Item must have a name.')
+
+	# Throw an exception if a FoodItem with the same name already exists for the user.
+	def check_for_duplicate(self):
 		existing_food_item = FoodItem.objects.filter(
 			food_item_name__iexact=self.food_item_name,
 			user = self.user
@@ -22,10 +40,6 @@ class FoodItem(models.Model):
 
 		if existing_food_item and existing_food_item != self:
 			raise UserDuplicateFoodItemError(f'A Food Item with the name {self.food_item_name} already exists for the user {self.user}')
-
-		self.food_item_name = self.food_item_name.title()
-
-		super().save(*args, **kwargs)
 
 	def get_newest_purchase(self):
 		return FoodPriceRecord.objects.filter(food_item=self).order_by('-date')[0]

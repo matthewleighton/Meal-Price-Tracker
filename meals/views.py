@@ -83,22 +83,15 @@ def new_food_item(request):
 	if not user.is_authenticated:
 		return HttpResponseForbidden()
 
-	if request.method == 'POST':
-		food_item_form = FoodItemForm(request.POST, user=user, request=request)
+	food_item_form = FoodItemForm(request.POST, user=user, request=request)
 
-		if food_item_form.is_valid():
-			food_item_form.save(commit=True)
+	if food_item_form.is_valid():
+		food_item_form.save(commit=True)
 
-			next = request.POST.get('next', '/')
-			return HttpResponseRedirect(next)
+		next = request.POST.get('next', '/')
+		return HttpResponseRedirect(next)
 
-	else:
-		food_item_form = FoodItemForm(user=user, request=request)
-
-	context = {'form': food_item_form}
-	
-
-	return render(request, 'meals/food_item/new.html', context)
+	return HttpResponse(status=201)
 
 def food_item_delete(request, food_item_id):
 	user = request.user

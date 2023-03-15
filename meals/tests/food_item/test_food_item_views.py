@@ -12,7 +12,7 @@ class TestFoodItemViews:
 		client.force_login(user)
 
 		client.post('/food_items/new/', {
-			'food_item_name': food_item_name,
+			'food_item_name': food_item_name
 		})
 
 		assert FoodItem.objects.filter(food_item_name=food_item_name).count() == 1
@@ -31,3 +31,12 @@ class TestFoodItemViews:
 		})
 
 		assert FoodItem.objects.filter(food_item_name=food_item_name).count() == 2
+
+	def test_food_items_must_have_names(self, user, client):
+		client.force_login(user)
+
+		client.post('/food_items/new/', {
+			'food_item_name': '',
+		})
+
+		assert FoodItem.objects.count() == 0

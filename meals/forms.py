@@ -48,8 +48,9 @@ class FoodItemForm(forms.ModelForm):
 		
 		if self.user is None:
 			raise ValueError('User must be provided to the FoodItemForm.')
-		
+
 		super().__init__(*args, **kwargs)
+
 
 	def save(self, commit=True):
 		food_item = super().save(commit=False)
