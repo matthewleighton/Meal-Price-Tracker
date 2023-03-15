@@ -43,8 +43,6 @@ class FoodItem(models.Model):
 	
 
 
-
-
 # Error to be triggered when a user tries to create a food item with a name that already exists.
 class UserDuplicateFoodItemError(ValidationError):
 	pass

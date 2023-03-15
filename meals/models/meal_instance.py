@@ -1,13 +1,9 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from ..validators import MealValidators
 
-# from .meal import Meal
-
 # This describes a particular time when a Meal was made.
 class MealInstance(models.Model):
-	# meal = models.ForeignKey(Meal,
 	meal = models.ForeignKey('meals.Meal',
 							 on_delete=models.CASCADE)
 	date = models.DateField('Date')

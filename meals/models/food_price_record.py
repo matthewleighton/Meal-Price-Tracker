@@ -4,14 +4,6 @@ from django.core.exceptions import ValidationError
 
 from ..validators import MealValidators
 
-# from . import FoodItem
-
-from decimal import getcontext
-from pint import UnitRegistry
-
-from pprint import pprint
-
-
 # This describes an instance of a FoodItem being purchased.
 # We can use this to track the price of a FoodItem over time.
 class FoodPriceRecord(models.Model):
