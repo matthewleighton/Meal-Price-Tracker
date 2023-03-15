@@ -97,6 +97,21 @@ def new_food_item(request):
 
 	return render(request, 'meals/food_item/new.html', context)
 
+def food_item_delete(request, food_item_id):
+	user = request.user
+
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
+	
+	food_item = get_object_or_404(FoodItem, pk=food_item_id)
+
+	if food_item.user != user:
+		return HttpResponseForbidden()
+	
+	food_item.delete()
+
+	previous_page = request.META.get('HTTP_REFERER', '/')
+	return redirect(previous_page)
 
 class FoodItemAutocomplete(autocomplete.Select2QuerySetView):
 	def get_queryset(self):

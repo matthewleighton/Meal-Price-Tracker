@@ -16,8 +16,9 @@ urlpatterns = [
 	path('food_items/', views.food_item_list, name='food_item_list'),
 	path('food_items/new/', views.new_food_item, name='new_food_item'),
 	path('food_items/<int:food_item_id>/', views.food_item, name='food_item'),
-    path('food_items/<int:ingredient_id>/delete/', views.ingredient_delete, name='ingredient_delete'),
-    
+	path('food_items/<int:food_item_id>/delete/', views.food_item_delete, name='food_item_delete'),
+
+    path('ingredients/<int:ingredient_id>/delete/', views.ingredient_delete, name='ingredient_delete'),
 	path('ingredients/new/<int:meal_id>', views.new_standard_ingredient, name='new_standard_ingredient'),
 
 	# re_path(

@@ -9,6 +9,7 @@
 			<th># Meals</th>
 			<th>Price</th>
 			<th># Purchases</th>
+			<th></th>
 		</tr>
 		{% for food_item in food_items %}
 			<tr>
@@ -20,6 +21,11 @@
 				<td>{{ food_item.meals|length }}</td>
 				<td>TODO</td>
 				<td>{{ food_item.purchases|length }}</td>
+				<td>
+					<a href="{% url 'food_item_delete' food_item_id=food_item.pk %}" 
+					   class="btn btn-danger"
+					   onclick="return confirm('Are you sure you want to delete this food item?')">Delete</a>
+				</td>
 			</tr>
 		{% endfor %}
 	</table>
