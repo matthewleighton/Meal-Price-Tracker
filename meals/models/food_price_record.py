@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 
 from ..validators import MealValidators
@@ -38,3 +39,13 @@ class FoodPriceRecord(models.Model):
 	
 	def format_quantity(self):
 		return f'{self.quantity} {self.unit}'
+	
+	# Return the price of this purchase in the specified currency.
+	def get_price_in_currency(self, currency=None):
+		if currency in [None, self.currency]:
+			return self.price_amount
+		
+		# TODO: Implement currency conversion.
+		return self.price_amount
+		
+		

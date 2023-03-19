@@ -1,4 +1,4 @@
-def get_conversion_factor(from_unit, to_unit):
+def get_unit_conversion_factor(from_unit, to_unit):
 	"""
 	Converts from one unit to another.
 	"""

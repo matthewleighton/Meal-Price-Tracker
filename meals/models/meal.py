@@ -30,10 +30,13 @@ class Meal(models.Model):
 		return [ingredient.food_item for ingredient in self.standard_ingredients ]
 	
 	def get_newest_price(self, format=True):
-		ingredient_prices = [ingredient.get_newest_price(format=False) for ingredient in self.standard_ingredients]
+		# TODO: We'll later let the user set their profile currency.
+		# For now we'll default to EUR.
+		user_currency = 'EUR'
+
+		ingredient_prices = [ingredient.get_newest_price(format=False, currency=user_currency) for ingredient in self.standard_ingredients]
 
 		meal_price = sum(ingredient_prices)
-
 
 		if not format:
 			return meal_price
