@@ -2,7 +2,7 @@
 
 {% block content%}
 
-<h1>Meal: {{ meal.meal_name }}</h1>
+<h1>Meal: {{ meal.meal_name }} ({{ meal.get_newest_price }})</h1>
 
 <h2>Ingredients: {{ standard_ingredients|length }}</h2>
 {% if standard_ingredients %}
@@ -22,7 +22,7 @@
 					</a>
 				</td>
 				<td>{{ ingredient.format_quantity }}</td>
-				<td>{{ ingredient.food_item.price }}</td>
+				<td>{{ ingredient.get_newest_price }}</td>
 				<td>
 					<a href="{% url 'ingredient' ingredient_id=ingredient.pk %}" 
 					   class="btn btn-primary">Edit</a>

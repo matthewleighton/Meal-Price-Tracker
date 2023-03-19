@@ -28,11 +28,20 @@ class Meal(models.Model):
 
 	def get_food_items(self):
 		return [ingredient.food_item for ingredient in self.standard_ingredients ]
+	
+	def get_newest_price(self, format=True):
+		ingredient_prices = [ingredient.get_newest_price(format=False) for ingredient in self.standard_ingredients]
 
-	# def get_newest_ingredient_prices(self):
-	# 	return {
-	# 		ingredient: ingredient.get_newest_price() for ingredient in self.standard_ingredients
-	# 	}
+		meal_price = sum(ingredient_prices)
+
+
+		if not format:
+			return meal_price
+		
+		meal_price = round(meal_price, 2)
+		
+		# TODO: Properly handle currency.
+		return f'{meal_price} {self.standard_ingredients[0].food_item.get_newest_purchase().currency}'			
 
 	# Return the cost of the required amounts of an ingredient for the meal.
 	def get_newest_ingredient_price(self, ingredient):
@@ -61,12 +70,6 @@ class Meal(models.Model):
 			purchase_quantity = ureg.Quantity(purchase_quantity, purchase_unit).to(meal_unit).magnitude
 
 		return (purchase_price / purchase_quantity) * meal_quantity 
-
-	# Return the cost of the meal, based on the most recent price records.
-	def get_newest_price(self):
-		return sum([
-			self.get_newest_ingredient_price(ingredient) for ingredient in self.standard_ingredients
-		])
 
 	# Return the quantity of a food item required for the meal.
 	# If the food item is not used in the meal, return 0.
