@@ -34,7 +34,14 @@
 	{% if meal_instance_form %}
 		<button id="add-meal-instance-btn" class="btn btn-primary">Add Time Cooked</button>
 	
-		<form id="meal-instance-form" action="{% url 'new_meal_instance' %}" method="POST" style="display:none;">
+		{% comment %}
+			TODO-NEXT! Update the action of this form, so it points to the current page.
+			This way, we can dispaly errorr message on the same page.
+			Also then need to update the view to handle the form submission.
+		{% endcomment %}
+		{% comment %} <form id="meal-instance-form" action="{% url 'new_meal_instance' %}" method="POST" style="display:none;"> {% endcomment %}
+		<form id="meal-instance-form" action="{% url 'meal_instance_list' %}" method="POST" style="display:none;">
+
 			{% csrf_token %}
 			{{ meal_instance_form.as_p }}
 			<button type="submit" class="btn btn-success">Save Time Cooked</button>

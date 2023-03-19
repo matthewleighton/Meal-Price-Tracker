@@ -2,22 +2,35 @@ from datetime import date
 from pprint import pprint
 from django import forms
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 
-from dal import autocomplete
-
 from .models import FoodItem, FoodPriceRecord, Meal, MealInstance, StandardIngredient
-# from .models import UserDuplicateFoodItemError
 
 from meals.models.food_item import UserDuplicateFoodItemError
-
 
 class MealForm(forms.ModelForm):
 	class Meta:
 		model = Meal
 		fields = ['meal_name']
+
+	def save(self, user=None, commit=True):
+		if user is None:
+			raise ValueError('User must be provided to the MealForm upon save.')
+		
+		if not isinstance(user, User):
+			raise ValueError('User provided to MealForm must be a User object.')
+
+		meal = super().save(commit=False)
+		meal.user = user
+
+		if commit:
+			meal.save()
+
+		return meal
+
 
 
 class MealInstanceForm(forms.ModelForm):
@@ -29,11 +42,22 @@ class MealInstanceForm(forms.ModelForm):
 			'date': forms.DateInput(attrs={'type': 'date'})
 		}
 
-	def __init__(self, user, *args, **kwargs):
+	def __init__(self, *args, **kwargs):
+		user = kwargs.pop('user', None)
+
+		if user is None:
+			raise ValueError('User must be provided to the MealInstanceForm.')
+		
+		# Check the user variable is a User object.
+		if not isinstance(user, User):
+			raise ValueError('User must be a User object.')
+
 		super().__init__(*args, **kwargs)
 
 		self.fields['meal'].queryset = Meal.objects.filter(user=user)
 		self.initial['date'] = date.today()
+		self.fields['form_type'] = forms.CharField(widget=forms.HiddenInput, initial='meal_instance')
+
 		
 
 
@@ -140,23 +164,28 @@ class StandardIngredientForm(forms.ModelForm):
 		model = StandardIngredient
 		fields = ['quantity', 'unit']
 
+		widgets = {
+			'quantity': forms.NumberInput(attrs={'required': True, 'step': '0.01', 'min': '0'}),
+			'unit': forms.TextInput(attrs={'required': True}),
+		}
+
 	food_item_name = forms.CharField(max_length=50, label="Food Item Name", required=False)
 	food_item_id = forms.IntegerField(required=False)
 
 	field_order = ['food_item_name', 'food_item_id', 'quantity', 'unit']
 
 	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
+		self.meal = kwargs.pop('meal', None)
+		self.user = kwargs.pop('user', None)
 
-		self.helper = FormHelper()
-		self.helper.layout = Layout(
-			'food_item',
-			'quantity',
-			'unit',
-			Submit('submit', 'Submit')
-		)
-		self.helper.form_method = 'POST'
-		self.helper.form_class = 'form-horizontal'
+		if self.user is None:
+			raise ValueError('User must be provided to the StandardIngredientForm.')
+		
+		if self.meal and self.meal.user != self.user:
+			raise ValueError('The meal provided to the StandardIngredientForm does not belong to the current user.')
+
+		super().__init__(*args, **kwargs)
+		self.fields['form_type'] = forms.CharField(widget=forms.HiddenInput, initial='standard_ingredient')
 
 	def clean(self):
 		cleaned_data = super().clean()
@@ -167,9 +196,22 @@ class StandardIngredientForm(forms.ModelForm):
 		if not food_item_name and not food_item_id:
 			raise forms.ValidationError('Please select an existing food item or enter a new one')
 		
+		if food_item_id:
+			try:
+				food_item = FoodItem.objects.get(id=food_item_id)
+			except FoodItem.DoesNotExist:
+				raise forms.ValidationError('The selected food item does not exist.')
+
+			if food_item.user != self.user:
+				raise forms.ValidationError('The selected food item does not belong to the current user.')
+		
 		return cleaned_data
 
-	def save(self, meal, user, commit=True):
+	def save(self, commit=True, meal=None):
+
+		if meal: # If the meal did not exist at form creation, we can pass it in here.
+			self.meal = meal
+
 		instance = super().save(commit=False)
 
 		food_item_id = self.cleaned_data.get('food_item_id')
@@ -177,16 +219,24 @@ class StandardIngredientForm(forms.ModelForm):
 
 		if food_item_id:
 			food_item = FoodItem.objects.get(id=food_item_id)
+			if food_item.user != self.user:
+				raise forms.ValidationError('The selected food item does not belong to the current user.')
 		elif food_item_name:
-			food_item = FoodItem.objects.create(
-				food_item_name=food_item_name,
-				user=user
-			)
+			try:
+				food_item = FoodItem.objects.create(
+					food_item_name=food_item_name,
+					user=self.meal.user
+				)
+			except UserDuplicateFoodItemError as e:
+				food_item = FoodItem.objects.filter(
+					food_item_name__iexact=food_item_name,
+					user=self.meal.user
+				).first()
 		else:
 			raise forms.ValidationError('Please select an existing food item or enter a new one')
 
 		instance.food_item = food_item
-		instance.meal = meal
+		instance.meal = self.meal
 
 		if commit:
 			instance.save()
