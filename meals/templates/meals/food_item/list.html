@@ -19,7 +19,7 @@
 					</a>
 				</td>
 				<td>{{ food_item.meals|length }}</td>
-				<td>TODO</td>
+				<td>{{ food_item.get_newest_price }}</td>
 				<td>{{ food_item.purchases|length }}</td>
 				<td>
 					<a href="{% url 'food_item_delete' food_item_id=food_item.pk %}" 

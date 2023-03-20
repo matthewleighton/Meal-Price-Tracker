@@ -34,6 +34,17 @@ class FoodPriceRecord(models.Model):
 								max_length=3, 
 								validators=[MealValidators.is_valid_currency])
 	
+	@property
+	def si_unit(self):
+		if self.unit == 'g':
+			return 'kg'
+		
+		if self.unit == 'ml':
+			return 'l'
+		
+		# TODO: Consider other unit cases.
+		return self.unit
+	
 	def format_price(self):
 		return f'{self.price_amount} {self.currency}'
 	

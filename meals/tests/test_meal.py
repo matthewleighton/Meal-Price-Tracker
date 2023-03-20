@@ -80,11 +80,11 @@ def test_meal_instances(user, num_porridge_instances, num_toast_instances):
 
 # The newest meal price should be the unit cost of each ingredient multiplied by the quantity of that ingredient.
 @pytest.mark.parametrize('oats_buy_price, oats_buy_qty, oats_ingredient_qty, milk_buy_price, milk_buy_qty, milk_ingredient_qty, expected_meal_price', [
-	(1.00, 1000, 1000, 2.00, 500, 500, Decimal('3.00')),
-	(0.50, 1000, 1000, 2.00, 500, 500, Decimal('2.50')),
-	(1.00, 1000, 250, 2.00, 500, 500, Decimal('2.25')),
-	(1.00, 50, 1000, 2.00, 500, 500, Decimal('22.00')),
-	(1.00, 50, 1000, 50.00, 250, 500, Decimal('120.00')),
+	(1.00, 1000, 1000, 2.00, 500, 500, '3.00 EUR'),
+	(0.50, 1000, 1000, 2.00, 500, 500, '2.50 EUR'),
+	(1.00, 1000, 250, 2.00, 500, 500, '2.25 EUR'),
+	(1.00, 50, 1000, 2.00, 500, 500, '22.00 EUR'),
+	(1.00, 50, 1000, 50.00, 250, 500, '120.00 EUR'),
 ])
 def test_newest_meal_price_correct(user, oats_buy_price, oats_buy_qty, oats_ingredient_qty, milk_buy_price, milk_buy_qty, milk_ingredient_qty, expected_meal_price):
 	today = date.today()
@@ -113,7 +113,6 @@ def test_newest_meal_price_correct(user, oats_buy_price, oats_buy_qty, oats_ingr
 								   unit='g', location='Lidl', date=last_week)
 	FoodPriceRecord.objects.create(food_item=milk, price_amount=800, currency='EUR', quantity=1,
 								   unit='ml', location='Lidl', date=last_week)
-
 
 	assert porridge.get_newest_price() == expected_meal_price
 

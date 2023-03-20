@@ -27,21 +27,9 @@ class StandardIngredient(models.Model):
 	def format_quantity(self):
 		return f'{self.quantity} {self.unit}'
 	
-	def get_newest_price(self, format=True, currency=None):
-		newest_purchase = self.food_item.get_newest_purchase()
-
-		if newest_purchase is None:
-
-			if format:
-				return 'N/A'
-			else:
-				return None
-			
-		purchase_price = newest_purchase.get_price_in_currency(currency)
-
-		unit_conversion_factor = get_unit_conversion_factor(newest_purchase.unit, self.unit)
-
-		price_for_quantity = purchase_price * (self.quantity / newest_purchase.quantity)
-		price_for_quantity /= unit_conversion_factor
-
-		return price_for_quantity if not format else f'{price_for_quantity} {newest_purchase.currency}'
+	def get_newest_price(self, format='absolute'):
+		return self.food_item.get_newest_price(format,
+					 						   currency='EUR',
+											   quantity=self.quantity, 
+											   unit=self.unit
+											   )

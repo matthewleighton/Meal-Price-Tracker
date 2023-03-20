@@ -1,7 +1,10 @@
+from decimal import Decimal
 from pprint import pprint
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
+
+from meals.helper import get_unit_conversion_factor
 
 from .meal import Meal
 from .food_price_record import FoodPriceRecord
@@ -27,6 +30,9 @@ class FoodItem(models.Model):
 
 		super().save(*args, **kwargs)
 
+	def my_test(self):
+		return 'Hello World'
+
 	def check_valid_name(self):
 		if not self.food_item_name:
 			raise ValidationError('Food Item must have a name.')
@@ -44,6 +50,46 @@ class FoodItem(models.Model):
 	def get_newest_purchase(self):
 		return FoodPriceRecord.objects.filter(food_item=self).order_by('-date')[0]
 	
+
+	def get_newest_price(self, format='per-unit', currency=None, quantity=1, unit=None):
+		newest_purchase = self.get_newest_purchase()
+
+		if newest_purchase is None:
+			if format:
+				return 'N/A'
+			else:
+				return None
+			
+		purchase_price = newest_purchase.get_price_in_currency(currency)
+		purchase_quantity = newest_purchase.quantity
+
+		# If no unit is specified, use the SI unit of the newest purchase.
+		if not unit:
+			unit = newest_purchase.si_unit
+
+		unit_conversion_factor = get_unit_conversion_factor(newest_purchase.unit, unit)
+		unit_conversion_factor = Decimal(unit_conversion_factor)
+
+		quantity = Decimal(quantity)
+
+		price_per_purchase_unit = purchase_price / purchase_quantity
+		price_per_output_unit = price_per_purchase_unit / unit_conversion_factor
+		price_for_quantity = round(price_per_output_unit * quantity, 2)
+
+		if not format:
+			return price_for_quantity
+		
+		VALID_FORMAT_OPTIONS = ['per-unit', 'absolute']
+
+		if format not in VALID_FORMAT_OPTIONS:
+			raise ValueError(f'format must either be one of {VALID_FORMAT_OPTIONS} or False. Got {format}.')
+
+		if format == 'absolute':
+			return f'{price_for_quantity} {newest_purchase.currency}'
+		elif format == 'per-unit':
+			return f'{price_for_quantity} {newest_purchase.currency} / {unit}'
+
+
 	# Return a list of all the meals that use this FoodItem.
 	@property
 	def meals(self):
@@ -54,6 +100,7 @@ class FoodItem(models.Model):
 	@property
 	def purchases(self):
 		return FoodPriceRecord.objects.filter(food_item=self)
+	
 	
 
 
