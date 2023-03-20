@@ -1,10 +1,12 @@
-from django.urls import path
+from django.urls import path, include
 
 from . import views
 
 urlpatterns = [
 
 	path('', views.index, name='index'),
+    
+	path('select2/', include('django_select2.urls')),
 
 	path('meals/', views.meal_list, name='meal_list'),
 	# path('meals/new/', views.meals_new, name='meals_new'),

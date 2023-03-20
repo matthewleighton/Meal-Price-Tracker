@@ -4,6 +4,8 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.models import User
 
+from django_select2 import forms as s2forms
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 
@@ -158,21 +160,25 @@ class FoodPriceRecordForm(forms.ModelForm):
 			instance.save()
 
 		return instance
+	
+
+class FoodItemWidget(s2forms.ModelSelect2Widget):
+	search_fields = [
+		'food_item_name__icontains',
+	]
 
 class StandardIngredientForm(forms.ModelForm):
 	class Meta:
 		model = StandardIngredient
-		fields = ['quantity', 'unit']
+		fields = ['food_item', 'quantity', 'unit']
 
 		widgets = {
 			'quantity': forms.NumberInput(attrs={'required': True, 'step': '0.01', 'min': '0'}),
 			'unit': forms.TextInput(attrs={'required': True}),
+			'food_item': FoodItemWidget(attrs={'required': True})
 		}
 
-	food_item_name = forms.CharField(max_length=50, label="Food Item Name", required=False)
-	food_item_id = forms.IntegerField(required=False)
-
-	field_order = ['food_item_name', 'food_item_id', 'quantity', 'unit']
+	field_order = ['food_item', 'quantity', 'unit']
 
 	def __init__(self, *args, **kwargs):
 		self.meal = kwargs.pop('meal', None)
@@ -190,13 +196,30 @@ class StandardIngredientForm(forms.ModelForm):
 	def clean(self):
 		cleaned_data = super().clean()
 
-		food_item_name = cleaned_data.get('food_item_name')
-		food_item_id = cleaned_data.get('food_item_id')
 
-		if not food_item_name and not food_item_id:
-			raise forms.ValidationError('Please select an existing food item or enter a new one')
+		# TODO-NEXT:
+		# I think the value stored in food_item is being removed if that value is not a valid FoodItem ID.
+		# This is a problem, because the field can also now be used to submit the name of a new food item.
+		# So I need to prevent the clean() function from removing the value, and do the validation myself.
+
+
+
+		# food_item_name = cleaned_data.get('food_item_name')
+		# food_item_id = cleaned_data.get('food_item_id')
+
+		# if not food_item_name and not food_item_id:
+		# 	raise forms.ValidationError('Please select an existing food item or enter a new one')
+
+
+		print('cleaned_data')
+		pprint(cleaned_data)
 		
-		if food_item_id:
+		submitted_food_item = cleaned_data.get('food_item')
+
+		# If a FoodItem ID was given, make sure if exists, and belongs to the current user.
+		if submitted_food_item.isdigit():
+			food_item_id = int(submitted_food_item)
+
 			try:
 				food_item = FoodItem.objects.get(id=food_item_id)
 			except FoodItem.DoesNotExist:
@@ -204,6 +227,16 @@ class StandardIngredientForm(forms.ModelForm):
 
 			if food_item.user != self.user:
 				raise forms.ValidationError('The selected food item does not belong to the current user.')
+
+
+		# if food_item_id:
+		# 	try:
+		# 		food_item = FoodItem.objects.get(id=food_item_id)
+		# 	except FoodItem.DoesNotExist:
+		# 		raise forms.ValidationError('The selected food item does not exist.')
+
+		# 	if food_item.user != self.user:
+		# 		raise forms.ValidationError('The selected food item does not belong to the current user.')
 		
 		return cleaned_data
 
@@ -217,11 +250,12 @@ class StandardIngredientForm(forms.ModelForm):
 		food_item_id = self.cleaned_data.get('food_item_id')
 		food_item_name = self.cleaned_data.get('food_item_name')
 
-		if food_item_id:
-			food_item = FoodItem.objects.get(id=food_item_id)
-			if food_item.user != self.user:
-				raise forms.ValidationError('The selected food item does not belong to the current user.')
-		elif food_item_name:
+		submitted_food_item = self.cleaned_data.get('food_item')
+
+		# If a string was submitted, check if that FoodItem already eixsts, and create it otherwise.
+		if not submitted_food_item.isdigit():
+			food_item_name = submitted_food_item
+
 			try:
 				food_item = FoodItem.objects.create(
 					food_item_name=food_item_name,
@@ -233,7 +267,26 @@ class StandardIngredientForm(forms.ModelForm):
 					user=self.meal.user
 				).first()
 		else:
-			raise forms.ValidationError('Please select an existing food item or enter a new one')
+			food_item_id = int(submitted_food_item)
+			food_item = FoodItem.objects.get(id=food_item_id)
+
+		# if food_item_id:
+		# 	food_item = FoodItem.objects.get(id=food_item_id)
+		# 	if food_item.user != self.user:
+		# 		raise forms.ValidationError('The selected food item does not belong to the current user.')
+		# elif food_item_name:
+		# 	try:
+		# 		food_item = FoodItem.objects.create(
+		# 			food_item_name=food_item_name,
+		# 			user=self.meal.user
+		# 		)
+		# 	except UserDuplicateFoodItemError as e:
+		# 		food_item = FoodItem.objects.filter(
+		# 			food_item_name__iexact=food_item_name,
+		# 			user=self.meal.user
+		# 		).first()
+		# else:
+		# 	raise forms.ValidationError('Please select an existing food item or enter a new one')
 
 		instance.food_item = food_item
 		instance.meal = self.meal

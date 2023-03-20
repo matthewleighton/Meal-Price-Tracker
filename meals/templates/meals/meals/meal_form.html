@@ -1,5 +1,5 @@
 <form id="new-meal-form" action="{% url 'meal_list' %}" method="POST">
-
+	{{ ingredient_formset.empty_form.media.css }}
 	<h3>New Meal</h3>
 	{% csrf_token %}
 	<p>Meal Name: {{ meal_form.meal_name }}</p>
@@ -29,6 +29,9 @@
 	<input type="hidden" name="redirect_location" value="{{ request.path }}">
 
 	<button type="submit" class="btn btn-success">Create Meal</button>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	{{ ingredient_formset.empty_form.media.js }}
 </form>
 
 <script>
@@ -45,6 +48,10 @@
 		var formContainer = document.getElementById('ingredients-container');
 		formContainer.appendChild(container);
 		formCountInput.value = formCount + 1;
+
+		$('.django-select2').djangoSelect2({placeholder: 'Select an Ingredient', width: '500px', tags: true});
+		
+		
 	}
 
 	function deleteIngredientForm(formId) {
@@ -52,4 +59,5 @@
 		var form = document.getElementById('ingredient-form-' + formId);
 		formContainer.removeChild(form);
 	}
+
 </script>

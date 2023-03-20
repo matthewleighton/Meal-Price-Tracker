@@ -21,7 +21,7 @@ from meals import views as meals_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
-    path("select2/", include("django_select2.urls")),
+    # path("select2/", include("django_select2.urls")),
 
     path('', meals_views.index, name='index'),
     path('', include('meals.urls')),
