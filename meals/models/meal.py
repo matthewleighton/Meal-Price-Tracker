@@ -47,31 +47,10 @@ class Meal(models.Model):
 
 	# Return the cost of the required amounts of an ingredient for the meal.
 	def get_newest_ingredient_price(self, ingredient):
-
 		if isinstance(ingredient, str):
 			ingredient = StandardIngredient.objects.get(meal=self, food_item__food_item_name__iexact=ingredient)
 
-		getcontext().prec = 6
-		purchase = ingredient.food_item.get_newest_purchase()
-
-		meal_unit = ingredient.unit
-		meal_quantity = ingredient.quantity
-
-		purchase_unit = purchase.unit
-		purchase_quantity = purchase.quantity
-		purchase_price = purchase.price_amount
-
-		if meal_unit != purchase_unit:
-			# Convert purchase units to meal units.
-			
-			#TODO: We need to handle the case where the meal unit and purchase units cannot be converted.
-			# e.g. length vs mass. Perhaps FoodItems should have a "unit type" definition.
-			# Or ingredients and purchases have their unit options limited by the choise of the base FoodItem.
-
-			ureg = UnitRegistry()
-			purchase_quantity = ureg.Quantity(purchase_quantity, purchase_unit).to(meal_unit).magnitude
-
-		return (purchase_price / purchase_quantity) * meal_quantity 
+		return ingredient.get_newest_price(format=False)
 
 	# Return the quantity of a food item required for the meal.
 	# If the food item is not used in the meal, return 0.
