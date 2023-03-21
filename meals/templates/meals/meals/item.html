@@ -46,12 +46,16 @@
 <button id="add-ingredient-btn" class="btn btn-primary">Add Ingredient</button>
 
 {% if standard_ingredients_form %}
+	{{ standard_ingredients_form.media.css }}
 	<form id="new-ingredient-form" action="{% url 'meals_item' meal_id=meal.pk %}" method="POST" style="display:none;">
 		{% csrf_token %}
 		{{ standard_ingredients_form.as_p }}
 		<button type="submit" class="btn btn-success">Save Ingredient</button>
 		<button id="cancel-new-ingredient-btn" type="button" class="btn btn-danger">Cancel</button>
 	</form>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	{{ standard_ingredients_form.media.js }}
 {% endif %}
 
 <hr>
@@ -110,6 +114,7 @@
 	document.getElementById('add-ingredient-btn').addEventListener('click', function() {
 		document.getElementById('new-ingredient-form').style.display='block';
 		document.getElementById('add-ingredient-btn').style.display='none';
+		$('.django-select2').djangoSelect2({width: '500px', tags: true});
 	});
 
 	document.getElementById('cancel-new-ingredient-btn').addEventListener('click', function() {

@@ -312,7 +312,7 @@ def meals_item(request, meal_id):
 
 			if standard_ingredient_form.is_valid():
 				standard_ingredient_form.save()
-				standard_ingredient_form = StandardIngredientForm(meal=meal)
+				standard_ingredient_form = StandardIngredientForm(meal=meal, user=user)
 	
 	else:
 		meal_instance_form = MealInstanceForm(initial={'meal': meal}, user=user)
