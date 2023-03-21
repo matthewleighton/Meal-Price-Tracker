@@ -48,7 +48,13 @@ class FoodItem(models.Model):
 			raise UserDuplicateFoodItemError(f'A Food Item with the name {self.food_item_name} already exists for the user {self.user}')
 
 	def get_newest_purchase(self):
-		return FoodPriceRecord.objects.filter(food_item=self).order_by('-date')[0]
+		purchases = FoodPriceRecord.objects.filter(food_item=self).order_by('-date')
+
+		if not purchases:
+			return None
+		
+		return purchases[0]
+
 	
 
 	def get_newest_price(self, format='per-unit', currency=None, quantity=1, unit=None):

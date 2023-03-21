@@ -34,6 +34,7 @@ class Meal(models.Model):
 			return 0
 
 		ingredient_prices = [ingredient.get_newest_price(format=False) for ingredient in self.standard_ingredients]
+		ingredient_prices = [price for price in ingredient_prices if price is not None]
 
 		meal_price = sum(ingredient_prices)
 
@@ -41,9 +42,11 @@ class Meal(models.Model):
 			return meal_price
 		
 		meal_price = round(meal_price, 2)
-		
+
 		# TODO: Properly handle currency.
-		return f'{meal_price} {self.standard_ingredients[0].food_item.get_newest_purchase().currency}'			
+		currency = 'EUR'
+		
+		return f'{meal_price} {currency}'
 
 	# Return the cost of the required amounts of an ingredient for the meal.
 	def get_newest_ingredient_price(self, ingredient):

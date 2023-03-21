@@ -167,6 +167,65 @@ class FoodItemWidget(s2forms.ModelSelect2Widget):
 		'food_item_name__icontains',
 	]
 
+	def get_queryset(self):
+		user = self.attrs.get('user', None)
+		if user:
+			return FoodItem.objects.filter(user=user)
+		else:
+			return FoodItem.objects.none()
+
+class FoodItemField(forms.ModelChoiceField):
+
+	def __init__(self, *args, **kwargs):
+		self.user = kwargs.pop('user', None)
+		super().__init__(FoodItem.objects.filter(user=self.user), *args, **kwargs)
+
+		self.widget = FoodItemWidget(attrs={'required': True, 'data-placeholder': 'Select a food item...', 'user': self.user})
+
+	def to_python(self, value):
+		if value.isdigit():
+			return super().to_python(value)
+		
+		# food_item_name = value.strip().capitalize()
+		
+		# existing_food_item = FoodItem.objects.filter(
+		# 	food_item_name__iexact=food_item_name,
+		# 	user=self.user
+		# )
+
+		# if existing_food_item:
+		# 	return existing_food_item.first()
+
+
+		# new_food_item = FoodItem(
+		# 	food_item_name=food_item_name,
+		# 	user=self.user
+		# )
+
+		# new_food_item.save()
+
+		# return new_food_item
+
+
+		# TODO: A potential problem here is that this creates and saves the new food item even if the form is not valid.
+		# This means we could end up with a bunch of food items that are not used anywhere.
+		# I've tried simply returning the new food item without saving it (see commented out code above),
+		# but then the validation failed because the food_item fields is apparently empty.
+		# Need to investigate this further.
+		name = value.strip().capitalize()
+		food_item, created = FoodItem.objects.get_or_create(
+			user=self.user,
+			food_item_name=name
+		)
+		return food_item
+		
+	def validate(self, value):
+		super().validate(value)
+
+		if value.user != self.user:
+			raise forms.ValidationError('Food item does not belong to this user.')
+		
+
 class StandardIngredientForm(forms.ModelForm):
 	class Meta:
 		model = StandardIngredient
@@ -175,7 +234,6 @@ class StandardIngredientForm(forms.ModelForm):
 		widgets = {
 			'quantity': forms.NumberInput(attrs={'required': True, 'step': '0.01', 'min': '0'}),
 			'unit': forms.TextInput(attrs={'required': True}),
-			'food_item': FoodItemWidget(attrs={'required': True})
 		}
 
 	field_order = ['food_item', 'quantity', 'unit']
@@ -192,101 +250,18 @@ class StandardIngredientForm(forms.ModelForm):
 
 		super().__init__(*args, **kwargs)
 		self.fields['form_type'] = forms.CharField(widget=forms.HiddenInput, initial='standard_ingredient')
-
-	def clean(self):
-		cleaned_data = super().clean()
-
-
-		# TODO-NEXT:
-		# I think the value stored in food_item is being removed if that value is not a valid FoodItem ID.
-		# This is a problem, because the field can also now be used to submit the name of a new food item.
-		# So I need to prevent the clean() function from removing the value, and do the validation myself.
-
-
-
-		# food_item_name = cleaned_data.get('food_item_name')
-		# food_item_id = cleaned_data.get('food_item_id')
-
-		# if not food_item_name and not food_item_id:
-		# 	raise forms.ValidationError('Please select an existing food item or enter a new one')
-
-
-		print('cleaned_data')
-		pprint(cleaned_data)
-		
-		submitted_food_item = cleaned_data.get('food_item')
-
-		# If a FoodItem ID was given, make sure if exists, and belongs to the current user.
-		if submitted_food_item.isdigit():
-			food_item_id = int(submitted_food_item)
-
-			try:
-				food_item = FoodItem.objects.get(id=food_item_id)
-			except FoodItem.DoesNotExist:
-				raise forms.ValidationError('The selected food item does not exist.')
-
-			if food_item.user != self.user:
-				raise forms.ValidationError('The selected food item does not belong to the current user.')
-
-
-		# if food_item_id:
-		# 	try:
-		# 		food_item = FoodItem.objects.get(id=food_item_id)
-		# 	except FoodItem.DoesNotExist:
-		# 		raise forms.ValidationError('The selected food item does not exist.')
-
-		# 	if food_item.user != self.user:
-		# 		raise forms.ValidationError('The selected food item does not belong to the current user.')
-		
-		return cleaned_data
+		self.fields['food_item'] = FoodItemField(user=self.user)
 
 	def save(self, commit=True, meal=None):
-
 		if meal: # If the meal did not exist at form creation, we can pass it in here.
 			self.meal = meal
 
 		instance = super().save(commit=False)
 
-		food_item_id = self.cleaned_data.get('food_item_id')
-		food_item_name = self.cleaned_data.get('food_item_name')
+		food_item = self.cleaned_data.get('food_item')
 
-		submitted_food_item = self.cleaned_data.get('food_item')
-
-		# If a string was submitted, check if that FoodItem already eixsts, and create it otherwise.
-		if not submitted_food_item.isdigit():
-			food_item_name = submitted_food_item
-
-			try:
-				food_item = FoodItem.objects.create(
-					food_item_name=food_item_name,
-					user=self.meal.user
-				)
-			except UserDuplicateFoodItemError as e:
-				food_item = FoodItem.objects.filter(
-					food_item_name__iexact=food_item_name,
-					user=self.meal.user
-				).first()
-		else:
-			food_item_id = int(submitted_food_item)
-			food_item = FoodItem.objects.get(id=food_item_id)
-
-		# if food_item_id:
-		# 	food_item = FoodItem.objects.get(id=food_item_id)
-		# 	if food_item.user != self.user:
-		# 		raise forms.ValidationError('The selected food item does not belong to the current user.')
-		# elif food_item_name:
-		# 	try:
-		# 		food_item = FoodItem.objects.create(
-		# 			food_item_name=food_item_name,
-		# 			user=self.meal.user
-		# 		)
-		# 	except UserDuplicateFoodItemError as e:
-		# 		food_item = FoodItem.objects.filter(
-		# 			food_item_name__iexact=food_item_name,
-		# 			user=self.meal.user
-		# 		).first()
-		# else:
-		# 	raise forms.ValidationError('Please select an existing food item or enter a new one')
+		# If the food item is a new one, we save it.
+		food_item.save()
 
 		instance.food_item = food_item
 		instance.meal = self.meal

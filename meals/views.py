@@ -257,7 +257,12 @@ def meal_list(request):
 		
 		ingredient_formset = StandardIngredientFormSet(request.POST, request.FILES, prefix='ingredient', form_kwargs={'user': user})
 
+		if not ingredient_formset.is_valid():
+			print('ingredient_formset is not valid')
+			print(ingredient_formset.errors)
+
 		if meal_form.is_valid() and ingredient_formset.is_valid():
+
 			meal = meal_form.save(user=user)
 
 			for ingredient_form in ingredient_formset:
