@@ -180,7 +180,13 @@ class FoodItemField(forms.ModelChoiceField):
 		self.user = kwargs.pop('user', None)
 		super().__init__(FoodItem.objects.filter(user=self.user), *args, **kwargs)
 
-		self.widget = FoodItemWidget(attrs={'required': True, 'data-placeholder': 'Select a food item...', 'user': self.user})
+		self.widget = FoodItemWidget(attrs={
+			'data-placeholder': 'Select a food item...',
+			'data-tags': 'true',
+			'data-width': '500px',
+			'required': True,
+			'user': self.user,
+		})
 
 	def to_python(self, value):
 		if value.isdigit():

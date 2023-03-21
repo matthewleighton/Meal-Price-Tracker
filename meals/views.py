@@ -248,13 +248,7 @@ def meal_list(request):
 	StandardIngredientFormSet = formset_factory(StandardIngredientForm, extra=0)
 
 	if request.method == 'POST':
-
-		pprint(request.POST)
-
 		meal_form = MealForm(request.POST)
-
-		pprint(meal_form.data)
-		
 		ingredient_formset = StandardIngredientFormSet(request.POST, request.FILES, prefix='ingredient', form_kwargs={'user': user})
 
 		if not ingredient_formset.is_valid():
