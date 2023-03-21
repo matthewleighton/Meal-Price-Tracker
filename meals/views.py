@@ -63,7 +63,7 @@ def food_item(request, food_item_id):
 
 	food_price_record_form = FoodPriceRecordForm(initial={'food_item': food_item}, user=user)
 	food_price_record_form.fields['food_item'].widget = forms.HiddenInput()
-	food_price_record_form.fields['new_food_item'].widget = forms.HiddenInput()
+	food_price_record_form.initial['food_item'] = food_item
 
 	meals = food_item.meals
 
