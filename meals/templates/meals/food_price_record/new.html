@@ -4,18 +4,6 @@
 
 <h2>Add Food Purchase</h2>
 
-<form action="{% url 'new_purchase' %}" method="POST">
-	{{ form.media.css }}
-	{% csrf_token %}
-	{{ form.as_p }}
-	<input type="submit" value="submit">
-
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	{{ form.media.js }}
-</form>
-
-<script>
-	$('.django-select2').djangoSelect2();
-</script>
+{% include 'meals/food_price_record/form.html' %}
 
 {% endblock %}

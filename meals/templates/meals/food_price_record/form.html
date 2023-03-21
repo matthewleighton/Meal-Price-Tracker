@@ -1,29 +1,49 @@
 {% if food_price_record_form %}
-	<button id="add-purchase-btn" class="btn btn-primary">Add Purchase</button>
+
+	{% if food_price_record_form_toggle %}
+		<button id="add-purchase-btn" class="btn btn-primary">Add Purchase</button>
+	{% endif %}
 	
-	<form id="new-purchase-form" action="{% url 'new_purchase' %}" method="POST" style="display:none;">
+	<form id="new-purchase-form" action="{% url 'new_purchase' %}" method="POST">
 		{{ food_price_record_form.media.css }}
 		{% csrf_token %}
 		{{ food_price_record_form.as_p }}
 		<button type="submit" class="btn btn-primary">Save Purchase</button>
-		<button id="cancel-purchase-btn" type="button" class="btn btn-danger">Cancel</button>
+		
+		{% if food_price_record_form_toggle %}
+			<button id="cancel-purchase-btn" type="button" class="btn btn-danger">Cancel</button>
+		{% endif %}
+		
 		
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 		{{ food_price_record_form.media.js }}
 	</form>
-{% endif %}
 
-<script>
-	document.getElementById('add-purchase-btn').addEventListener('click', function() {
-		document.getElementById('new-purchase-form').style.display='block';
-		document.getElementById('add-purchase-btn').style.display='none';
-
+	<script>
 		$('.django-select2').djangoSelect2();
-	});
+	</script>
 
-	document.getElementById('cancel-purchase-btn').addEventListener('click', function() {
-		document.getElementById('new-purchase-form').style.display='none';
-		document.getElementById('add-purchase-btn').style.display='block';
-	});
-</script>
+	{% if food_price_record_form_toggle %}
+		<script>
+			document.getElementById('add-purchase-btn').addEventListener('click', function() {
+				document.getElementById('new-purchase-form').style.display='block';
+				document.getElementById('add-purchase-btn').style.display='none';
 
+				const select2Input = $('#id_food_item');
+				select2Input.select2('open');
+			});
+
+			document.getElementById('cancel-purchase-btn').addEventListener('click', function() {
+				document.getElementById('new-purchase-form').style.display='none';
+				document.getElementById('add-purchase-btn').style.display='block';
+			});
+		</script>
+
+		<style>
+			#new-purchase-form {
+				display: none;
+			}
+		</style>
+	{% endif %}
+
+{% endif %}

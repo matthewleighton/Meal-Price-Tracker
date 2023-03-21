@@ -140,6 +140,7 @@ def price_record_list(request):
 
 	context = {
 		'food_price_record_form': food_price_record_form,
+		'food_price_record_form_toggle': True,
 		'price_records': price_records
 	}
 
@@ -152,18 +153,18 @@ def new_food_price_record(request):
 		return HttpResponseRedirect('/')
 	
 	if request.method == 'POST':
-		form = FoodPriceRecordForm(request.POST, user=user)
+		food_price_record_form = FoodPriceRecordForm(request.POST, user=user)
 
-		if form.is_valid():
-			form.save()
+		if food_price_record_form.is_valid():
+			food_price_record_form.save()
 			
 			previous_page = request.META.get('HTTP_REFERER', '/')
 			return redirect(previous_page)
 
 	else:
-		form = FoodPriceRecordForm(user=user)
+		food_price_record_form = FoodPriceRecordForm(user=user)
 
-	context = {'form': form}
+	context = {'food_price_record_form': food_price_record_form}
 
 	return render(request, 'meals/food_price_record/new.html', context)
 
