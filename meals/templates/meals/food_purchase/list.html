@@ -15,7 +15,7 @@
 			<tr>
 				<td>
 					<a href="{% url 'food_item' food_item_id=purchase.food_item.pk %}">
-						{{ purchase.food_item.food_item_name }}
+						{{ purchase.food_item.name }}
 					</a>
 				</td>
 				<td>{{ purchase.format_quantity }}</td>

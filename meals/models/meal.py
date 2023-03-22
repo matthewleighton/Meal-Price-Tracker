@@ -51,7 +51,7 @@ class Meal(models.Model):
 	# Return the cost of the required amounts of an ingredient for the meal.
 	def get_newest_ingredient_price(self, ingredient):
 		if isinstance(ingredient, str):
-			ingredient = StandardIngredient.objects.get(meal=self, food_item__food_item_name__iexact=ingredient)
+			ingredient = StandardIngredient.objects.get(meal=self, food_item__name__iexact=ingredient)
 
 		return ingredient.get_newest_price(format=False)
 

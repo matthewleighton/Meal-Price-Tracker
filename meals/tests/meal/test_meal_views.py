@@ -54,8 +54,8 @@ def test_meal_list_view_redirects_to_new_meal_page_after_creation(client, user):
 	assert response.url == f'/meals/{meal_id}/'
 
 def test_meal_list_create_with_existing_food_items(client, user):
-	oats = FoodItem.objects.create(food_item_name='Oats', user=user)
-	milk = FoodItem.objects.create(food_item_name='Milk', user=user)
+	oats = FoodItem.objects.create(name='Oats', user=user)
+	milk = FoodItem.objects.create(name='Milk', user=user)
 	
 	meal_name = 'Porridge'
 
@@ -121,8 +121,8 @@ def test_meal_list_create_with_new_food_items(client, user):
 	assert len(food_items) == 2
 
 	# Check that the food items have been created correctly.
-	oats = FoodItem.objects.get(food_item_name='Oats')
-	milk = FoodItem.objects.get(food_item_name='Milk')
+	oats = FoodItem.objects.get(name='Oats')
+	milk = FoodItem.objects.get(name='Milk')
 
 	assert oats.user == user
 	assert milk.user == user
@@ -140,7 +140,7 @@ def test_meal_list_create_with_new_food_items(client, user):
 
 # Test that a meal can be created with new and existing food items.
 def test_meal_list_create_with_new_and_existing_food_items(client, user):
-	oats = FoodItem.objects.create(food_item_name='Oats', user=user)
+	oats = FoodItem.objects.create(name='Oats', user=user)
 	
 	post_data = {
 		'ingredient-TOTAL_FORMS': 2,
@@ -168,7 +168,7 @@ def test_meal_list_create_with_new_and_existing_food_items(client, user):
 	assert len(food_items) == 2
 
 	# Check that milk has been created correctly.
-	milk = FoodItem.objects.get(food_item_name='Milk')
+	milk = FoodItem.objects.get(name='Milk')
 	assert milk.user == user
 
 	ingredients = porridge.standard_ingredients
@@ -184,7 +184,7 @@ def test_meal_list_create_with_new_and_existing_food_items(client, user):
 
 # Test that a meal cannot be created when a food_item id belongs to a different user.
 def test_meals_create_with_other_users_food_item(client, user, other_user):
-	milk = FoodItem.objects.create(food_item_name='Milk', user=other_user)
+	milk = FoodItem.objects.create(name='Milk', user=other_user)
 
 	post_data = {
 		'ingredient-TOTAL_FORMS': 2,

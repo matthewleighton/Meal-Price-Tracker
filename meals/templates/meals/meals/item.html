@@ -18,7 +18,7 @@
 			<tr>
 				<td>
 					<a href="{% url 'food_item' food_item_id=ingredient.food_item.pk %}">
-						{{ ingredient.food_item.food_item_name }}
+						{{ ingredient.food_item.name }}
 					</a>
 				</td>
 				<td>{{ ingredient.format_quantity }}</td>

@@ -63,7 +63,7 @@ class MealInstanceForm(forms.ModelForm):
 class FoodItemForm(forms.ModelForm):
 	class Meta:
 		model = FoodItem
-		fields = ['food_item_name']
+		fields = ['name']
 
 	def __init__(self, *args, **kwargs):
 		self.user    = kwargs.pop('user', None)
@@ -89,11 +89,11 @@ class FoodItemForm(forms.ModelForm):
 				if self.request: # We can only pass the message if the request is provided.
 					messages.warning(
 						self.request,
-						f'Food item "{food_item.food_item_name}" already exists.'
+						f'Food item "{food_item.name}" already exists.'
 					)
 
 				return FoodItem.objects.filter(
-					food_item_name__iexact=food_item.food_item_name,
+					name__iexact=food_item.name,
 					user=self.user
 				).first()
 
@@ -126,7 +126,7 @@ class FoodPurchaseForm(forms.ModelForm):
 
 class FoodItemWidget(s2forms.ModelSelect2Widget):
 	search_fields = [
-		'food_item_name__icontains',
+		'name__icontains',
 	]
 
 	def get_queryset(self):
@@ -157,7 +157,7 @@ class FoodItemField(forms.ModelChoiceField):
 		# food_item_name = value.strip().capitalize()
 		
 		# existing_food_item = FoodItem.objects.filter(
-		# 	food_item_name__iexact=food_item_name,
+		# 	name__iexact=food_item_name,
 		# 	user=self.user
 		# )
 
@@ -166,7 +166,7 @@ class FoodItemField(forms.ModelChoiceField):
 
 
 		# new_food_item = FoodItem(
-		# 	food_item_name=food_item_name,
+		# 	name=food_item_name,
 		# 	user=self.user
 		# )
 
@@ -180,10 +180,10 @@ class FoodItemField(forms.ModelChoiceField):
 		# I've tried simply returning the new food item without saving it (see commented out code above),
 		# but then the validation failed because the food_item fields is apparently empty.
 		# Need to investigate this further.
-		name = value.strip().capitalize()
+		food_item_name = value.strip().capitalize()
 		food_item, created = FoodItem.objects.get_or_create(
 			user=self.user,
-			food_item_name=name
+			name=food_item_name
 		)
 		return food_item
 		

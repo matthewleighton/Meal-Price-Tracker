@@ -8,7 +8,7 @@ from ..helper import get_unit_conversion_factor
 class StandardIngredient(models.Model):
 
 	def __str__(self):
-		return f'{self.meal.meal_name}: {self.food_item.food_item_name}'
+		return f'{self.meal.meal_name}: {self.food_item.name}'
 
 	meal = models.ForeignKey('meals.Meal',
 							 on_delete=models.CASCADE)

@@ -12,11 +12,11 @@ from .food_purchase import FoodPurchase
 # This describes a FoodItem that can be used in a meal.
 # A FoodItem becomes an ingredient when it is used in a meal.
 class FoodItem(models.Model):
-	food_item_name = models.CharField(max_length=100)
+	name = models.CharField(max_length=100)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.food_item_name
+		return self.name
 	
 	def save(self, *args, **kwargs):
 		
@@ -26,26 +26,23 @@ class FoodItem(models.Model):
 		self.check_valid_name()
 		self.check_for_duplicate()
 
-		self.food_item_name = self.food_item_name.title()
+		self.name = self.name.title()
 
 		super().save(*args, **kwargs)
 
-	def my_test(self):
-		return 'Hello World'
-
 	def check_valid_name(self):
-		if not self.food_item_name:
+		if not self.name:
 			raise ValidationError('Food Item must have a name.')
 
 	# Throw an exception if a FoodItem with the same name already exists for the user.
 	def check_for_duplicate(self):
 		existing_food_item = FoodItem.objects.filter(
-			food_item_name__iexact=self.food_item_name,
+			name__iexact=self.name,
 			user = self.user
 		).first()
 
 		if existing_food_item and existing_food_item != self:
-			raise UserDuplicateFoodItemError(f'A Food Item with the name {self.food_item_name} already exists for the user {self.user}')
+			raise UserDuplicateFoodItemError(f'A Food Item with the name {self.name} already exists for the user {self.user}')
 
 	def get_newest_purchase(self):
 		purchases = FoodPurchase.objects.filter(food_item=self).order_by('-date')

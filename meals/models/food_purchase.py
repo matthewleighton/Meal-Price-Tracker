@@ -8,7 +8,7 @@ from ..validators import MealValidators
 class FoodPurchase(models.Model):
 
 	def __str__(self):
-		return f'{self.food_item.food_item_name}: {self.price_amount} {self.currency} for {self.quantity} {self.unit} @ {self.location} on {self.date}'		
+		return f'{self.food_item.name}: {self.price_amount} {self.currency} for {self.quantity} {self.unit} @ {self.location} on {self.date}'		
 
 	food_item = models.ForeignKey('meals.FoodItem',
 								  on_delete=models.CASCADE)

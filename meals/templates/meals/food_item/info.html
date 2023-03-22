@@ -2,7 +2,7 @@
 {% block content %}
 {% load meals_extras %}
 
-<h1>Ingredient: {{ food_item.food_item_name }}</h1>
+<h1>Ingredient: {{ food_item.name }}</h1>
 
 <h3>Meals: {{ meals|length }}</h3>
 
@@ -20,7 +20,7 @@
 		{% endfor %}
 	</table>
 {% else %}
-	<p>{{ food_item.food_item_name }} is not used in any meals.</p>
+	<p>{{ food_item.name }} is not used in any meals.</p>
 {% endif %}
 
 <h3>Purchases: {{ price_records|length }}</h3>

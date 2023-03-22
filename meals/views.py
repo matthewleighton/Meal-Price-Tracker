@@ -38,7 +38,7 @@ def food_item_list(request):
 	if not user.is_authenticated:
 		return redirect('/')
 
-	food_items = FoodItem.objects.filter(user=user).order_by('food_item_name')
+	food_items = FoodItem.objects.filter(user=user).order_by('name')
 	form = FoodItemForm(user=user, request=request)
 
 	context = {
@@ -120,12 +120,12 @@ class FoodItemAutocomplete(autocomplete.Select2QuerySetView):
 		qs = FoodItem.objects.filter(user=self.request.user)
 
 		if self.q:
-			qs = qs.filter(food_item_name__istartswith=self.q)
+			qs = qs.filter(name__istartswith=self.q)
 
 		return qs
 
 ##############################################################################
-#-------------------------- Food Price Record -------------------------------#
+#---------------------------- Food Purchase ---------------------------------#
 ##############################################################################
 
 def price_record_list(request):
@@ -411,7 +411,7 @@ def ingredient_delete(request, ingredient_id):
 	ingredient.delete()
 
 	meal_name = ingredient.meal
-	food_item_name = ingredient.food_item.food_item_name
+	food_item_name = ingredient.food_item.name
 
 	message = f'{meal_name} ingredient "{food_item_name}" has been deleted!'
 	messages.success(request, message)
