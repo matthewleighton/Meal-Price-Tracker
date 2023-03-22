@@ -5,7 +5,7 @@ from ..validators import MealValidators
 
 # This describes an instance of a FoodItem being purchased.
 # We can use this to track the price of a FoodItem over time.
-class FoodPriceRecord(models.Model):
+class FoodPurchase(models.Model):
 
 	def __str__(self):
 		return f'{self.food_item.food_item_name}: {self.price_amount} {self.currency} for {self.quantity} {self.unit} @ {self.location} on {self.date}'		

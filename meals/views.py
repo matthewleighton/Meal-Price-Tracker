@@ -10,8 +10,8 @@ from django.views.decorators.http import require_http_methods
 
 from dal import autocomplete
 
-from .forms import FoodItemForm, FoodPriceRecordForm, MealForm, MealInstanceForm, StandardIngredientForm
-from .models import FoodItem, FoodPriceRecord, Meal, MealInstance, StandardIngredient
+from .forms import FoodItemForm, FoodPurchaseForm, MealForm, MealInstanceForm, StandardIngredientForm
+from .models import FoodItem, FoodPurchase, Meal, MealInstance, StandardIngredient
 
 from pprint import pprint
 
@@ -59,11 +59,11 @@ def food_item(request, food_item_id):
 	if food_item.user != user:
 		return HttpResponseForbidden()
 
-	price_records = FoodPriceRecord.objects.filter(food_item=food_item)
+	price_records = FoodPurchase.objects.filter(food_item=food_item)
 
-	food_price_record_form = FoodPriceRecordForm(initial={'food_item': food_item}, user=user)
-	food_price_record_form.fields['food_item'].widget = forms.HiddenInput()
-	food_price_record_form.initial['food_item'] = food_item
+	food_purchase_form = FoodPurchaseForm(initial={'food_item': food_item}, user=user)
+	food_purchase_form.fields['food_item'].widget = forms.HiddenInput()
+	food_purchase_form.initial['food_item'] = food_item
 
 	meals = food_item.meals
 
@@ -71,7 +71,7 @@ def food_item(request, food_item_id):
 		'food_item': food_item,
 		'meals': meals,
 		'price_records': price_records,
-		'food_price_record_form': food_price_record_form
+		'food_purchase_form': food_purchase_form
 	}
 
 	return render(request, 'meals/food_item/info.html', context)
@@ -133,40 +133,40 @@ def price_record_list(request):
 	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
 
-	price_records = FoodPriceRecord.objects.filter(food_item__user__exact=user).order_by('-date')
+	price_records = FoodPurchase.objects.filter(food_item__user__exact=user).order_by('-date')
 
-	food_price_record_form = FoodPriceRecordForm(user=user)
+	food_purchase_form = FoodPurchaseForm(user=user)
 
 
 	context = {
-		'food_price_record_form': food_price_record_form,
-		'food_price_record_form_toggle': True,
+		'food_purchase_form': food_purchase_form,
+		'food_purchase_form_toggle': True,
 		'price_records': price_records
 	}
 
-	return render(request, 'meals/food_price_record/list.html', context=context)
+	return render(request, 'meals/food_purchase/list.html', context=context)
 
-def new_food_price_record(request):
+def new_food_purchase(request):
 	user = request.user
 
 	if not user.is_authenticated:
 		return HttpResponseRedirect('/')
 	
 	if request.method == 'POST':
-		food_price_record_form = FoodPriceRecordForm(request.POST, user=user)
+		food_purchase_form = FoodPurchaseForm(request.POST, user=user)
 
-		if food_price_record_form.is_valid():
-			food_price_record_form.save()
+		if food_purchase_form.is_valid():
+			food_purchase_form.save()
 			
 			previous_page = request.META.get('HTTP_REFERER', '/')
 			return redirect(previous_page)
 
 	else:
-		food_price_record_form = FoodPriceRecordForm(user=user)
+		food_purchase_form = FoodPurchaseForm(user=user)
 
-	context = {'food_price_record_form': food_price_record_form}
+	context = {'food_purchase_form': food_purchase_form}
 
-	return render(request, 'meals/food_price_record/new.html', context)
+	return render(request, 'meals/food_purchase/new.html', context)
 
 ##############################################################################
 #------------------------------- Meal Instance ------------------------------#

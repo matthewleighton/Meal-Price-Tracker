@@ -3,7 +3,7 @@ from django.forms import ValidationError
 
 import pytest
 
-from meals.models import FoodItem, FoodPriceRecord
+from meals.models import FoodItem, FoodPurchase
 from meals.models.food_item import UserDuplicateFoodItemError
 
 class TestFoodItemModel:
@@ -15,9 +15,9 @@ class TestFoodItemModel:
 		last_week = date.today() - timedelta(days=7)
 		last_year = date.today() - timedelta(days=365)
 
-		old_milk 	= FoodPriceRecord.objects.create(food_item=milk, price_amount=5.00, currency='EUR', quantity=1, unit='l', location='Aldi', date=last_year)
-		new_milk 	= FoodPriceRecord.objects.create(food_item=milk, price_amount=1.00, currency='EUR', quantity=1, unit='l', location='Aldi', date=today)
-		middle_milk = FoodPriceRecord.objects.create(food_item=milk, price_amount=2.00, currency='EUR', quantity=1, unit='l', location='Aldi', date=last_week)
+		old_milk 	= FoodPurchase.objects.create(food_item=milk, price_amount=5.00, currency='EUR', quantity=1, unit='l', location='Aldi', date=last_year)
+		new_milk 	= FoodPurchase.objects.create(food_item=milk, price_amount=1.00, currency='EUR', quantity=1, unit='l', location='Aldi', date=today)
+		middle_milk = FoodPurchase.objects.create(food_item=milk, price_amount=2.00, currency='EUR', quantity=1, unit='l', location='Aldi', date=last_week)
 
 		assert milk.get_newest_purchase() == new_milk
 
@@ -60,8 +60,8 @@ class TestFoodItemModel:
 	def test_get_newest_price_defaults_to_price_per_SI(self, user, purchase_price, purchase_quantity, unit, expected_price):
 		food_item = FoodItem.objects.create(food_item_name='Delicious Food Item', user=user)
 
-		new_purchase = FoodPriceRecord.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=unit, location='Aldi', date=date.today())
-		old_purchase = FoodPriceRecord.objects.create(food_item=food_item, price_amount=2.00, currency='EUR', quantity=1, unit=unit, location='Aldi', date=date.today() - timedelta(days=7))
+		new_purchase = FoodPurchase.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=unit, location='Aldi', date=date.today())
+		old_purchase = FoodPurchase.objects.create(food_item=food_item, price_amount=2.00, currency='EUR', quantity=1, unit=unit, location='Aldi', date=date.today() - timedelta(days=7))
 
 		assert food_item.get_newest_price() == expected_price
 
@@ -77,7 +77,7 @@ class TestFoodItemModel:
 	])
 	def test_get_newest_price_format_absolute_SI(self, user, purchase_price, purchase_quantity, unit, expected_price):
 		food_item = FoodItem.objects.create(food_item_name='Delicious Food Item', user=user)
-		FoodPriceRecord.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=unit, location='Aldi', date=date.today())
+		FoodPurchase.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=unit, location='Aldi', date=date.today())
 		
 		assert food_item.get_newest_price(format='absolute') == expected_price
 
@@ -89,7 +89,7 @@ class TestFoodItemModel:
 	])
 	def test_get_newest_price_format_absolute_SI_quantity(self, user, purchase_price, purchase_quantity, output_quantity, purchase_unit, expected_price):
 		food_item = FoodItem.objects.create(food_item_name='Delicious Food Item', user=user)
-		FoodPriceRecord.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=purchase_unit, location='Aldi', date=date.today())
+		FoodPurchase.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=purchase_unit, location='Aldi', date=date.today())
 		
 		assert food_item.get_newest_price(format='absolute', quantity=output_quantity) == expected_price
 
@@ -100,7 +100,7 @@ class TestFoodItemModel:
 	])
 	def test_get_newest_price_format_absolute_SI_unit(self, user, purchase_price, purchase_quantity, purchase_unit, output_unit, expected_price):
 		food_item = FoodItem.objects.create(food_item_name='Delicious Food Item', user=user)
-		FoodPriceRecord.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=purchase_unit, location='Aldi', date=date.today())
+		FoodPurchase.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=purchase_unit, location='Aldi', date=date.today())
 		
 		assert food_item.get_newest_price(format='absolute', unit=output_unit) == expected_price
 
@@ -116,6 +116,6 @@ class TestFoodItemModel:
 	])
 	def test_get_newest_price_format_absolute_SI_unit_quantity(self, user, purchase_price, purchase_quantity, purchase_unit, output_quantity, output_unit, expected_price):
 		food_item = FoodItem.objects.create(food_item_name='Delicious Food Item', user=user)
-		FoodPriceRecord.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=purchase_unit, location='Aldi', date=date.today())
+		FoodPurchase.objects.create(food_item=food_item, price_amount=purchase_price, currency='EUR', quantity=purchase_quantity, unit=purchase_unit, location='Aldi', date=date.today())
 		
 		assert food_item.get_newest_price(format='absolute', unit=output_unit, quantity=output_quantity) == expected_price

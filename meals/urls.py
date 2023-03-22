@@ -23,7 +23,7 @@ urlpatterns = [
 	path('ingredients/new/<int:meal_id>', views.new_standard_ingredient, name='new_standard_ingredient'),
 
 	path('purchases/', views.price_record_list, name='purchase_list'),
-	path('purchases/new/', views.new_food_price_record, name='new_purchase'),
+	path('purchases/new/', views.new_food_purchase, name='new_purchase'),
 
 	path('meal_instances/', views.meal_instance_list, name='meal_instance_list'),
 	path('meal_instances/new/', views.new_meal_instance, name='new_meal_instance'),

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 from django_select2 import forms as s2forms
 
-from .models import FoodItem, FoodPriceRecord, Meal, MealInstance, StandardIngredient
+from .models import FoodItem, FoodPurchase, Meal, MealInstance, StandardIngredient
 
 from meals.models.food_item import UserDuplicateFoodItemError
 
@@ -104,9 +104,9 @@ class FoodItemForm(forms.ModelForm):
 	
 
 
-class FoodPriceRecordForm(forms.ModelForm):
+class FoodPurchaseForm(forms.ModelForm):
 	class Meta:
-		model = FoodPriceRecord
+		model = FoodPurchase
 		fields = ['food_item', 'price_amount', 'currency', 'quantity', 'unit', 'location', 'date']
 
 

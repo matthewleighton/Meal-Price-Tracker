@@ -4,7 +4,7 @@ from pprint import pprint
 
 import pytest
 
-from meals.models import FoodItem, FoodPriceRecord, Meal, MealInstance, StandardIngredient
+from meals.models import FoodItem, FoodPurchase, Meal, MealInstance, StandardIngredient
 
 # Test that getting a meal's standard ingredients returns the correct items.
 def test_get_meal_standard_ingredients(user):
@@ -101,17 +101,17 @@ def test_newest_meal_price_correct(user, oats_buy_price, oats_buy_qty, oats_ingr
 	StandardIngredient.objects.create(meal=porridge, food_item=milk, quantity=milk_ingredient_qty, unit='ml')
 
 	# New purchases. These newest meal price should be based on these.
-	FoodPriceRecord.objects.create(food_item=oats, price_amount=oats_buy_price, currency='EUR', quantity=oats_buy_qty,
+	FoodPurchase.objects.create(food_item=oats, price_amount=oats_buy_price, currency='EUR', quantity=oats_buy_qty,
 								   unit='g', location='Lidl', date=today)
-	FoodPriceRecord.objects.create(food_item=milk, price_amount=milk_buy_price, currency='EUR', quantity=milk_buy_qty,
+	FoodPurchase.objects.create(food_item=milk, price_amount=milk_buy_price, currency='EUR', quantity=milk_buy_qty,
 								   unit='ml', location='Lidl', date=today)
 
 	# Old purchases. These should not effect the newest meal price.
-	FoodPriceRecord.objects.create(food_item=oats, price_amount=1.23, currency='EUR', quantity=500,
+	FoodPurchase.objects.create(food_item=oats, price_amount=1.23, currency='EUR', quantity=500,
 								   unit='g', location='Lidl', date=last_year)
-	FoodPriceRecord.objects.create(food_item=oats, price_amount=500, currency='EUR', quantity=500,
+	FoodPurchase.objects.create(food_item=oats, price_amount=500, currency='EUR', quantity=500,
 								   unit='g', location='Lidl', date=last_week)
-	FoodPriceRecord.objects.create(food_item=milk, price_amount=800, currency='EUR', quantity=1,
+	FoodPurchase.objects.create(food_item=milk, price_amount=800, currency='EUR', quantity=1,
 								   unit='ml', location='Lidl', date=last_week)
 
 	assert porridge.get_newest_price() == expected_meal_price
@@ -128,7 +128,7 @@ def test_get_newest_ingredient_price_no_unit_conversion(user, oats_ingredient_qt
 	oats = FoodItem.objects.create(food_item_name='Oats', user=user)
 	porridge = Meal.objects.create(meal_name='Porridge', user=user)
 	StandardIngredient.objects.create(meal=porridge, food_item=oats, quantity=oats_ingredient_qty, unit='g')
-	FoodPriceRecord.objects.create(food_item=oats, price_amount=oats_buy_price, currency='EUR', quantity=oats_buy_qty,
+	FoodPurchase.objects.create(food_item=oats, price_amount=oats_buy_price, currency='EUR', quantity=oats_buy_qty,
 								   unit='g', location='Lidl', date=date.today())
 
 	assert porridge.get_newest_ingredient_price('oats') == oats_ingredient_price

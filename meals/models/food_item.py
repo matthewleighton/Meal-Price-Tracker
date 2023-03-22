@@ -7,7 +7,7 @@ from django.forms import ValidationError
 from meals.helper import get_unit_conversion_factor
 
 from .meal import Meal
-from .food_price_record import FoodPriceRecord
+from .food_purchase import FoodPurchase
 
 # This describes a FoodItem that can be used in a meal.
 # A FoodItem becomes an ingredient when it is used in a meal.
@@ -48,7 +48,7 @@ class FoodItem(models.Model):
 			raise UserDuplicateFoodItemError(f'A Food Item with the name {self.food_item_name} already exists for the user {self.user}')
 
 	def get_newest_purchase(self):
-		purchases = FoodPriceRecord.objects.filter(food_item=self).order_by('-date')
+		purchases = FoodPurchase.objects.filter(food_item=self).order_by('-date')
 
 		if not purchases:
 			return None
@@ -105,7 +105,7 @@ class FoodItem(models.Model):
 	
 	@property
 	def purchases(self):
-		return FoodPriceRecord.objects.filter(food_item=self)
+		return FoodPurchase.objects.filter(food_item=self)
 	
 	
 

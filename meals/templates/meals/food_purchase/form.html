@@ -1,29 +1,29 @@
-{% if food_price_record_form %}
+{% if food_purchase_form %}
 
-	{% if food_price_record_form_toggle %}
+	{% if food_purchase_form_toggle %}
 		<button id="add-purchase-btn" class="btn btn-primary">Add Purchase</button>
 	{% endif %}
 	
 	<form id="new-purchase-form" action="{% url 'new_purchase' %}" method="POST">
-		{{ food_price_record_form.media.css }}
+		{{ food_purchase_form.media.css }}
 		{% csrf_token %}
-		{{ food_price_record_form.as_p }}
+		{{ food_purchase_form.as_p }}
 		<button type="submit" class="btn btn-primary">Save Purchase</button>
 		
-		{% if food_price_record_form_toggle %}
+		{% if food_purchase_form_toggle %}
 			<button id="cancel-purchase-btn" type="button" class="btn btn-danger">Cancel</button>
 		{% endif %}
 		
 		
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-		{{ food_price_record_form.media.js }}
+		{{ food_purchase_form.media.js }}
 	</form>
 
 	<script>
 		$('.django-select2').djangoSelect2();
 	</script>
 
-	{% if food_price_record_form_toggle %}
+	{% if food_purchase_form_toggle %}
 		<script>
 			document.getElementById('add-purchase-btn').addEventListener('click', function() {
 				document.getElementById('new-purchase-form').style.display='block';
