@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             name='Meal',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('meal_name', models.CharField(max_length=200)),
+                ('name', models.CharField(max_length=200)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),

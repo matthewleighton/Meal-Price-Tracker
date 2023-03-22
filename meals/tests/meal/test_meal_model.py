@@ -9,7 +9,7 @@ from meals.models import FoodItem, FoodPurchase, Meal, MealInstance, StandardIng
 # Test that getting a meal's standard ingredients returns the correct items.
 def test_get_meal_standard_ingredients(user):
 	# Creating porridge
-	porridge = Meal.objects.create(meal_name='Porridge', user=user)
+	porridge = Meal.objects.create(name='Porridge', user=user)
 	oats 	 = FoodItem.objects.create(name='Oats', user=user)
 	milk 	 = FoodItem.objects.create(name='Milk', user=user)
 	expected_porridge_ingredients = [
@@ -18,7 +18,7 @@ def test_get_meal_standard_ingredients(user):
 	]
 		
 	# Creating toast
-	toast = Meal.objects.create(meal_name='Toast', user=user)
+	toast = Meal.objects.create(name='Toast', user=user)
 	jam   = FoodItem.objects.create(name='Jam', user=user)
 	excepted_toast_ingredients = [
 		StandardIngredient.objects.create(meal=toast, food_item=jam, quantity=1, unit='tbsp')
@@ -32,19 +32,19 @@ def test_get_meal_standard_ingredients(user):
 
 # Test that getting a meal's standard ingredients still works when there are no ingredients.
 def test_get_meal_standard_ingredients_empty(user):
-	porridge = Meal.objects.create(meal_name='Porridge', user=user)
+	porridge = Meal.objects.create(name='Porridge', user=user)
 
 	assert list(porridge.standard_ingredients) == []	
 
 def test_get_meal_food_items(user):
-	porridge = Meal.objects.create(meal_name='Porridge', user=user)
+	porridge = Meal.objects.create(name='Porridge', user=user)
 	oats = FoodItem.objects.create(name='Oats', user=user)
 	milk = FoodItem.objects.create(name='Milk', user=user)
 	StandardIngredient.objects.create(meal=porridge, food_item=oats, quantity=50, unit='g')
 	StandardIngredient.objects.create(meal=porridge, food_item=milk, quantity=100, unit='ml')
 	expected_porridge_food_items = [oats, milk]
 
-	toast = Meal.objects.create(meal_name='Toast', user=user)
+	toast = Meal.objects.create(name='Toast', user=user)
 	jam   = FoodItem.objects.create(name='Jam', user=user)
 	StandardIngredient.objects.create(meal=toast, food_item=jam, quantity=1, unit='tbsp')
 	expected_toast_food_items = [jam]
@@ -62,8 +62,8 @@ def test_get_meal_food_items(user):
 	(10, 5)
 ])
 def test_meal_instances(user, num_porridge_instances, num_toast_instances):
-	porridge = Meal.objects.create(meal_name='Porridge', user=user)
-	toast 	 = Meal.objects.create(meal_name='Toast', user=user)
+	porridge = Meal.objects.create(name='Porridge', user=user)
+	toast 	 = Meal.objects.create(name='Toast', user=user)
 
 	porridge_instances = [
 		MealInstance.objects.create(meal=porridge, date=date.today(), num_servings=1, rating=5, cook_time=10)
@@ -92,7 +92,7 @@ def test_newest_meal_price_correct(user, oats_buy_price, oats_buy_qty, oats_ingr
 	last_year = date.today() - timedelta(days=365)
 
 	# Create meal and food items.
-	porridge = Meal.objects.create(meal_name='Porridge', user=user)
+	porridge = Meal.objects.create(name='Porridge', user=user)
 	oats = FoodItem.objects.create(name='Oats', user=user)
 	milk = FoodItem.objects.create(name='Milk', user=user)
 
@@ -126,7 +126,7 @@ def test_newest_meal_price_correct(user, oats_buy_price, oats_buy_qty, oats_ingr
 ])
 def test_get_newest_ingredient_price_no_unit_conversion(user, oats_ingredient_qty, oats_buy_qty, oats_buy_price, oats_ingredient_price):
 	oats = FoodItem.objects.create(name='Oats', user=user)
-	porridge = Meal.objects.create(meal_name='Porridge', user=user)
+	porridge = Meal.objects.create(name='Porridge', user=user)
 	StandardIngredient.objects.create(meal=porridge, food_item=oats, quantity=oats_ingredient_qty, unit='g')
 	FoodPurchase.objects.create(food_item=oats, price_amount=oats_buy_price, currency='EUR', quantity=oats_buy_qty,
 								   unit='g', location='Lidl', date=date.today())

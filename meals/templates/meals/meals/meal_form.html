@@ -2,7 +2,7 @@
 	{{ ingredient_formset.empty_form.media.css }}
 	<h3>New Meal</h3>
 	{% csrf_token %}
-	<p>Meal Name: {{ meal_form.meal_name }}</p>
+	<p>Meal Name: {{ meal_form.name }}</p>
 	
 	<hr/>
 

@@ -13,7 +13,7 @@ class MealInstance(models.Model):
 
 	def __str__(self):
 		date_string = self.date.strftime('%m/%d/%Y')
-		return f'{self.meal.meal_name} on {date_string}: {self.rating}/5 stars'
+		return f'{self.meal.name} on {date_string}: {self.rating}/5 stars'
 	
 	def list_format(self):
 		date_string = self.date.strftime('%m/%d/%Y')

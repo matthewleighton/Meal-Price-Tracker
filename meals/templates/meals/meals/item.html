@@ -2,7 +2,7 @@
 
 {% block content%}
 
-<h1>Meal: {{ meal.meal_name }} ({{ meal.get_newest_price }})</h1>
+<h1>Meal: {{ meal.name }} ({{ meal.get_newest_price }})</h1>
 
 <h2>Ingredients: {{ standard_ingredients|length }}</h2>
 {% if standard_ingredients %}

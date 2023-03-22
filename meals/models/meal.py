@@ -8,11 +8,11 @@ from decimal import getcontext
 from pint import UnitRegistry
 
 class Meal(models.Model):
-	meal_name = models.CharField(max_length=200)
+	name = models.CharField(max_length=200)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.meal_name
+		return self.name
 
 	@property
 	def meal_instances(self):

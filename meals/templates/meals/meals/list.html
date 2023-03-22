@@ -15,7 +15,7 @@
 		</tr>
 		{% for meal in meals %}
 			<tr>
-				<td><a href="{% url 'meals_item' meal_id=meal.pk %}">{{ meal.meal_name }}</a></td>
+				<td><a href="{% url 'meals_item' meal_id=meal.pk %}">{{ meal.name }}</a></td>
 				<td>{{ meal.meal_instances|length }}</td>
 				<td>{{ meal.get_newest_price }}</td>
 				<td>{{ meal.standard_ingredients|length }}</td>

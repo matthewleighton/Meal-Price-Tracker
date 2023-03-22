@@ -13,7 +13,7 @@ from meals.models.food_item import UserDuplicateFoodItemError
 class MealForm(forms.ModelForm):
 	class Meta:
 		model = Meal
-		fields = ['meal_name']
+		fields = ['name']
 
 	def save(self, user=None, commit=True):
 		if user is None:
