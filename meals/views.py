@@ -252,19 +252,21 @@ def meal_list(request):
 		meal_form = MealForm(request.POST)
 		ingredient_formset = StandardIngredientFormSet(request.POST, request.FILES, prefix='ingredient', form_kwargs={'user': user})
 
-		if not ingredient_formset.is_valid():
-			print('ingredient_formset is not valid')
-			print(ingredient_formset.errors)
+		if meal_form.is_valid():
+			meal = meal_form.save(user=user, commit=False)
 
-		if meal_form.is_valid() and ingredient_formset.is_valid():
-
-			meal = meal_form.save(user=user)
-
+			# Pass the meal to the ingredient formset
 			for ingredient_form in ingredient_formset:
-				ingredient_form.save(meal=meal)
+				ingredient_form.instance.meal = meal
 
-			return redirect('meals_item', meal_id=meal.id)
-	
+			if ingredient_formset.is_valid():
+				meal.save()
+
+				for ingredient_form in ingredient_formset:
+					ingredient_form.save(meal=meal)
+
+				return redirect('meals_item', meal_id=meal.id)
+				
 	else:
 		meal_form = MealForm()
 		ingredient_formset = StandardIngredientFormSet(prefix='ingredient', form_kwargs={'user': user})
@@ -375,28 +377,25 @@ def ingredient(request, ingredient_id):
 
 	return render(request, 'meals/ingredient/item.html', context)
 
-@require_POST
-def new_standard_ingredient(request, meal_id):
-	user = request.user
+# @require_POST
+# def new_standard_ingredient(request, meal_id):
+# 	user = request.user
 
-	if not user.is_authenticated:
-		return HttpResponseForbidden()
+# 	if not user.is_authenticated:
+# 		return HttpResponseForbidden()
 
-	meal = get_object_or_404(Meal, pk=meal_id)
+# 	meal = get_object_or_404(Meal, pk=meal_id)
 
-	if not meal.user == user:
-		return HttpResponseForbidden()
+# 	if not meal.user == user:
+# 		return HttpResponseForbidden()
 		
-	standard_ingredient_form = StandardIngredientForm(request.POST)
+# 	standard_ingredient_form = StandardIngredientForm(request.POST)
 	
-	if standard_ingredient_form.is_valid():
-		standard_ingredient_form.save(meal=meal)
-		return redirect(reverse('meals_item', args=[meal_id]))
+# 	if standard_ingredient_form.is_valid():
+# 		standard_ingredient_form.save(meal=meal)
+# 		return redirect(reverse('meals_item', args=[meal_id]))
 		
-	return redirect(reverse('meals_item', args=[meal_id]))	
-
-
-
+# 	return redirect(reverse('meals_item', args=[meal_id]))	
 
 def ingredient_delete(request, ingredient_id):
 	user = request.user

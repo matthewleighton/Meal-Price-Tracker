@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ValidationError
 
 from ..validators import MealValidators
 
@@ -24,6 +25,22 @@ class StandardIngredient(models.Model):
 							max_length=20,
 							validators=[MealValidators.is_valid_unit])
 	
+	def clean(self, *args, **kwargs):
+		super().clean()
+
+		if not hasattr(self, 'meal') or self.meal is None:
+			raise ValidationError('Meal must be provided')
+
+		if not hasattr(self, 'food_item') or self.food_item is None:
+			raise ValidationError('Food Item must be provided')
+
+		if self.meal.user != self.food_item.user:
+			raise ValidationError('Meal and Food Item must belong to the same user')
+		
+	def save(self, *args, **kwargs):
+		self.full_clean()
+		super().save()
+
 	def format_quantity(self):
 		return f'{self.quantity} {self.unit}'
 	
