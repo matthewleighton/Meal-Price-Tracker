@@ -220,11 +220,12 @@ class StandardIngredientForm(forms.ModelForm):
 		self.fields['form_type'] = forms.CharField(widget=forms.HiddenInput, initial='standard_ingredient')
 		self.fields['food_item'] = FoodItemField(user=self.user)
 
-		if self.meal:
-			self.instance.meal = self.meal
+		if self.instance and hasattr(self.instance, 'meal'):
+			self.meal = self.instance.meal
+
+		self.instance.meal = self.meal
 
 		self.assign_food_item()
-
 
 	def save(self, commit=True, meal=None):
 		if meal: # If the meal did not exist at form creation, we can pass it in here.
@@ -233,7 +234,14 @@ class StandardIngredientForm(forms.ModelForm):
 		if not hasattr(self, 'meal'):
 			raise ValueError('The meal must be provided to the StandardIngredientForm before saving.')
 
-		instance = super().save(commit=False)
+		if not isinstance(self.meal, Meal):
+			raise ValueError('The meal provided to the StandardIngredientForm must be an instance of Meal.')
+
+		if not self.instance:
+			instance = super().save(commit=False)
+		else:
+			instance = self.instance
+
 		instance.meal = self.meal
 
 		if commit:

@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 from meals.models import FoodItem, Meal, MealInstance
+from meals.models.standard_ingredient import StandardIngredient
 
 def test_meals_endpoint_401_for_logged_out_user(client, user):
 	assert client.get('/meals/').status_code == 401

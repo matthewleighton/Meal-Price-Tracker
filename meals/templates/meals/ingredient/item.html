@@ -2,18 +2,6 @@
 
 {% block content%}
 
-This is ingredient/item.html
-
-{{ ingredient }}
-
-<form action="{% url 'ingredient' ingredient_id=ingredient.pk %}" method='POST'>
-
-{% csrf_token %}
-
-	{{ form.as_p }}
-
-	<button type="submit" class="btn btn-success">Submit</button>	
-</form>
-
+{% include 'meals/ingredient/form.html' %}
 
 {% endblock %}

@@ -2,6 +2,8 @@ from pprint import pprint
 
 from meals.models.food_item import FoodItem
 from meals.models.meal import Meal
+from meals.models.standard_ingredient import StandardIngredient
+
 
 
 class TestStandardIngredientViews:
@@ -106,3 +108,62 @@ class TestStandardIngredientViews:
 		
 		assert len(form_errors)
 		assert 'food_item' in form_errors
+
+	#################################################################
+	# Editing Ingredients
+	#################################################################
+
+	def test_edit_ingredient(self, user, client):
+		porridge = Meal.objects.create(name='Porridge', user=user)
+		oats = FoodItem.objects.create(name='Oats', user=user)
+		ingredient = StandardIngredient.objects.create(meal=porridge, food_item=oats, quantity=100, unit='g')
+		
+		client.force_login(user)
+
+		client.post(f'/ingredients/{ingredient.id}/', {
+			'food_item': oats.id,
+			'quantity': 200,
+			'unit': 'kg',
+			'form_type': 'standard_ingredient',
+			'ingredient_id': ingredient.id
+		})
+
+		assert porridge.standard_ingredients.count() == 1
+		assert porridge.standard_ingredients.first().quantity == 200
+		assert porridge.standard_ingredients.first().unit == 'kg'
+
+	def test_edit_ingredient_logged_out(self, user, client):
+		porridge = Meal.objects.create(name='Porridge', user=user)
+		oats = FoodItem.objects.create(name='Oats', user=user)
+		ingredient = StandardIngredient.objects.create(meal=porridge, food_item=oats, quantity=100, unit='g')
+		
+		response = client.post(f'/ingredients/{ingredient.id}/', {
+			'food_item': oats.id,
+			'quantity': 200,
+			'unit': 'g',
+			'form_type': 'standard_ingredient',
+			'ingredient_id': ingredient.id
+		})
+
+		assert response.status_code == 401
+		assert porridge.standard_ingredients.count() == 1
+		assert porridge.standard_ingredients.first().quantity == 100
+
+	def test_edit_ingredient_other_users_meal(self, user, other_user, client):
+		porridge = Meal.objects.create(name='Porridge', user=other_user)
+		oats = FoodItem.objects.create(name='Oats', user=other_user)
+		ingredient = StandardIngredient.objects.create(meal=porridge, food_item=oats, quantity=100, unit='g')
+		
+		client.force_login(user)
+
+		response = client.post(f'/ingredients/{ingredient.id}/', {
+			'food_item': oats.id,
+			'quantity': 200,
+			'unit': 'g',
+			'form_type': 'standard_ingredient',
+			'ingredient_id': ingredient.id
+		})
+
+		assert response.status_code == 403
+		assert porridge.standard_ingredients.count() == 1
+		assert porridge.standard_ingredients.first().quantity == 100
