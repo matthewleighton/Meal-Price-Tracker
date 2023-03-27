@@ -62,41 +62,7 @@
 
 <h2>Times Cooked: {{ meal.meal_instances|length }}</h2>
 
-{% if meal.meal_instances|length %}
-	
-	<table class="table sortable table-stripped">
-		<tr>
-			<th>Date</th>
-			<th>Rating</th>
-			<th>Time</th>
-			<th></th>
-			<th></th>
-		</tr>
-		{% for instance in meal_instances %}
-			<tr>
-				<td>{{ instance.date }}</td>
-				<td>{{ instance.format_rating }}</td>
-				<td>{{ instance.format_cook_time }}</td>
-				<td>
-					<form action="">
-						<button type="submit" class="btn btn-primary btn-sm">
-							Edit
-						</button>
-					</form>
-				</td>
-				<td>
-					<form action="{% url 'meal_instance_delete' meal_instance_id=instance.pk %}" method="POST" style="display:inline">
-						{% csrf_token %}
-						<input type="hidden" name="_method" value="DELETE">
-						<button type="submit" class="btn btn-danger btn-sm">
-							Delete
-						</button>
-					</form>
-				</td>
-			</tr>
-		{% endfor %}
-	</table>
-{% endif %}
+{% include 'meals/meal_instance/list_table.html' %}
 
 <button id="add-meal-instance-btn" class="btn btn-primary">Add Time Cooked</button>
 

@@ -3,33 +3,8 @@
 {% block content %}
 	<h1>Meal Diary</h1>
 
+	{% include 'meals/meal_instance/list_table.html' %}
 
-	<table class="table sortable table-stripped">
-		<tr>
-			<th>Meal</th>
-			<th>Date</th>
-			<th>Rating</th>
-			<th>Time</th>
-			<th></th>
-		</tr>
-		{% for instance in meal_instances %}
-			<tr>
-				<td>
-					<a href="{% url 'meals_item' meal_id=instance.meal.pk %}">
-						{{ instance.meal.name }}
-					</a>
-				</td>
-				<td>{{ instance.date }}</td>
-				<td>{{ instance.format_rating }}</td>
-				<td>{{ instance.format_cook_time }}</td>
-				<td>
-					<a href="{% url 'meal_instance_delete' meal_instance_id=instance.pk %}" 
-					   class="btn btn-danger"
-					   onclick="return confirm('Are you sure you want to delete this meal instance?')">Delete</a>
-				</td>
-			</tr>
-		{% endfor %}
-	</table>
 
 	{% if meal_instance_form %}
 		<button id="add-meal-instance-btn" class="btn btn-primary">Add Time Cooked</button>
