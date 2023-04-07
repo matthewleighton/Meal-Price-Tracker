@@ -201,7 +201,6 @@ class StandardIngredientForm(forms.ModelForm):
 
 		widgets = {
 			'quantity': forms.NumberInput(attrs={'required': True, 'step': '0.01', 'min': '0'}),
-			'unit': forms.TextInput(attrs={'required': True}),
 		}
 
 	field_order = ['food_item', 'quantity', 'unit']

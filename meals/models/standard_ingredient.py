@@ -3,10 +3,20 @@ from django.forms import ValidationError
 
 from ..validators import MealValidators
 
-from ..helper import get_unit_conversion_factor
+# from ..helper import get_unit_conversion_factor
 
 # A Meal is made up of a collection of StandardIngredients.
 class StandardIngredient(models.Model):
+
+	UNIT_CHOICES = (
+		('g', 'Grams'),
+		('kg', 'Kilograms'),
+		('ml', 'Millilitres'),
+		('l', 'Litres'),
+		('tsp', 'Teaspoons'),
+		('tbsp', 'Tablespoons'),
+		('pc', 'Pieces'),
+	)
 
 	def __str__(self):
 		if not hasattr(self, 'meal') or self.meal is None:
@@ -18,9 +28,6 @@ class StandardIngredient(models.Model):
 			food_item_name = 'Unnamed Food Item'
 		else:
 			food_item_name = self.food_item.name
-
-		# meal_name = self.meal.get('name', 'Unnamed Meal')
-		# food_item_name = self.food_item.get('name', 'Unnamed Food Item')
 
 		return f'{meal_name}: {food_item_name}'
 
@@ -36,21 +43,19 @@ class StandardIngredient(models.Model):
 
 	unit = models.CharField('Unit',
 							max_length=20,
-							validators=[MealValidators.is_valid_unit])
+							# validators=[MealValidators.is_valid_unit],
+							choices=UNIT_CHOICES)
 	
 	def clean(self, *args, **kwargs):
 		super().clean()
 
 		if not hasattr(self, 'meal') or self.meal is None:
-			print('1111111111')
 			raise ValidationError('Meal must be provided')
 
 		if not hasattr(self, 'food_item') or self.food_item is None:
-			print('2222222222')
 			raise ValidationError('Food Item must be provided')
 
 		if self.meal.user != self.food_item.user:
-			print('3333333333')
 			raise ValidationError('Meal and Food Item must belong to the same user')
 		
 	def save(self, *args, **kwargs):
