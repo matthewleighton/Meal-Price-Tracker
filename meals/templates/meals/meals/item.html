@@ -60,11 +60,11 @@
 
 <hr>
 
-<h2>Times Cooked: {{ meal.meal_instances|length }}</h2>
+<h2>Meal Instances: {{ meal.meal_instances|length }}</h2>
 
 {% include 'meals/meal_instance/list_table.html' %}
 
-<button id="add-meal-instance-btn" class="btn btn-primary">Add Time Cooked</button>
+<button id="add-meal-instance-btn" class="btn btn-primary">Add Meal Instance</button>
 
 {% if meal_instance_form %}
 	<form id="meal-instance-form" action="{% url 'meals_item' meal_id=meal.pk %}" method="POST" style="display:none;">
