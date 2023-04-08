@@ -168,6 +168,39 @@ def new_food_purchase(request):
 
 	return render(request, 'meals/food_purchase/new.html', context)
 
+def food_purchase_detail(request, food_purchase_id):
+	user = request.user
+
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
+
+	food_purchase = get_object_or_404(FoodPurchase, pk=food_purchase_id)
+
+	if food_purchase.food_item.user != user:
+		return HttpResponseForbidden()
+	
+	if request.method == 'POST':
+		food_purchase_form = FoodPurchaseForm(request.POST, instance=food_purchase, user=user)
+
+		if food_purchase_form.is_valid():
+			food_purchase_form.save()
+
+			food_item_url = reverse('food_item', args=[food_purchase.food_item.id])
+			return redirect(food_item_url)
+		
+	else:
+		food_purchase_form = FoodPurchaseForm(instance=food_purchase, user=user)
+		food_purchase_form.initial['food_item'] = food_purchase.food_item
+
+	food_purchase_form.fields['food_item'].widget = forms.HiddenInput()
+
+	context = {
+		'food_purchase': food_purchase,
+		'food_purchase_form': food_purchase_form
+	}
+
+	return render(request, 'meals/food_purchase/detail.html', context)
+
 ##############################################################################
 #------------------------------- Meal Instance ------------------------------#
 ##############################################################################

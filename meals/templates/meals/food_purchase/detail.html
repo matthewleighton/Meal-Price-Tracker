@@ -1,0 +1,15 @@
+{% extends '../base.html' %}
+
+{% block content %}
+	<h1>Food Purchase: {{ food_purchase.food_item.name }}</h1>
+
+	<form action="{% url 'purchase' food_purchase_id=food_purchase.pk %}" method="POST">
+		{% csrf_token %}
+		{{ food_purchase_form.as_p }}
+
+		<input type="submit" value="Update Purchase" class="btn btn-primary"/>
+	</form>
+
+	
+	
+{% endblock  %}

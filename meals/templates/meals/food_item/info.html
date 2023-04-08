@@ -32,6 +32,8 @@
 			<th>Price</th>
 			<th>Location</th>
 			<th>Date</th>
+			<th></th>
+			<th></th>
 		</tr>
 		{% for purchase in price_records %}
 			<tr>
@@ -39,6 +41,11 @@
 				<td>{{ purchase.format_price }}</td>
 				<td>{{ purchase.location }}</td>
 				<td>{{ purchase.date }}</td>
+				<td>
+					<a href="{% url 'purchase' food_purchase_id=purchase.pk %}" 
+					class="btn btn-primary">Edit</a>
+				</td>
+				<td>Delete</td>
 			</tr>
 		{% endfor %}
 	</table>
