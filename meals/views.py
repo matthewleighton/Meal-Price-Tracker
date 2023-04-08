@@ -180,14 +180,16 @@ def food_purchase_detail(request, food_purchase_id):
 		return HttpResponseForbidden()
 	
 	if request.method == 'POST':
+		
 		food_purchase_form = FoodPurchaseForm(request.POST, instance=food_purchase, user=user)
+
 
 		if food_purchase_form.is_valid():
 			food_purchase_form.save()
 
 			food_item_url = reverse('food_item', args=[food_purchase.food_item.id])
 			return redirect(food_item_url)
-		
+
 	else:
 		food_purchase_form = FoodPurchaseForm(instance=food_purchase, user=user)
 		food_purchase_form.initial['food_item'] = food_purchase.food_item

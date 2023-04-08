@@ -123,6 +123,15 @@ class FoodPurchaseForm(forms.ModelForm):
 		self.initial['date'] = date.today()
 		self.fields['food_item'] = FoodItemField(user=self.user, required=True)
 
+	def clean(self):
+		cleaned_data = super().clean()
+
+		food_item = cleaned_data.get('food_item')
+
+		if not food_item:
+			self.add_error('food_item', 'Please select a food item.')
+		elif food_item.user != self.user:
+			self.add_error('food_item', 'The selected food item does not belong to the current user.')
 
 class FoodItemWidget(s2forms.ModelSelect2Widget):
 	search_fields = [
