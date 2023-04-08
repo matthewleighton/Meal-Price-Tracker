@@ -201,6 +201,23 @@ def food_purchase_detail(request, food_purchase_id):
 
 	return render(request, 'meals/food_purchase/detail.html', context)
 
+def food_purchase_delete(request, food_purchase_id):
+	user = request.user
+
+	if not user.is_authenticated:
+		return HttpResponseForbidden()
+	
+	food_purchase = get_object_or_404(FoodPurchase, pk=food_purchase_id)
+
+	if food_purchase.food_item.user != user:
+		return HttpResponseForbidden()
+	
+	food_purchase.delete()
+
+	previous_page = request.META.get('HTTP_REFERER', '/')
+	return redirect(previous_page)
+
+
 ##############################################################################
 #------------------------------- Meal Instance ------------------------------#
 ##############################################################################

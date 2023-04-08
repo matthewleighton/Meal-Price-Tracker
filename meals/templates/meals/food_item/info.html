@@ -45,7 +45,9 @@
 					<a href="{% url 'purchase' food_purchase_id=purchase.pk %}" 
 					class="btn btn-primary">Edit</a>
 				</td>
-				<td>Delete</td>
+				<td>
+					<a href="{% url 'purchase_delete' food_purchase_id=purchase.pk %}" class="btn btn-danger">Delete</a>
+				</td>
 			</tr>
 		{% endfor %}
 	</table>
