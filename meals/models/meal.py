@@ -16,7 +16,8 @@ class Meal(models.Model):
 
 	@property
 	def meal_instances(self):
-		return MealInstance.objects.filter(meal=self)
+		return MealInstance.objects.filter(meal=self).order_by('-date')
+
 
 	@property
 	def average_price(self):
