@@ -1,6 +1,8 @@
 <table class="table sortable table-stripped">
 	<tr>
-		<th>Meal</th>
+		{% if not hide_meal_instance_name %}
+			<th>Meal</th>
+		{% endif %}
 		<th>Date</th>
 		<th>Rating</th>
 		<th>Time</th>
@@ -9,11 +11,13 @@
 	</tr>
 	{% for instance in meal_instances %}
 		<tr>
-			<td>
-				<a href="{% url 'meals_item' meal_id=instance.meal.pk %}">
-					{{ instance.meal.name }}
-				</a>
-			</td>
+			{% if not hide_meal_instance_name %}
+				<td>
+					<a href="{% url 'meals_item' meal_id=instance.meal.pk %}">
+						{{ instance.meal.name }}
+					</a>
+				</td>
+			{% endif %}
 			<td>{{ instance.date }}</td>
 			<td>{{ instance.format_rating }}</td>
 			<td>{{ instance.format_cook_time }}</td>

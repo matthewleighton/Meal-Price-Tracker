@@ -317,6 +317,7 @@ def meals_item(request, meal_id):
 	meal_instance_form.fields['meal'].widget = forms.HiddenInput()
 	
 	context = {
+		'hide_meal_instance_name': True,
 		'meal': meal,
 		'standard_ingredients': standard_ingredients,
 		'meal_instances': meal.meal_instances,
