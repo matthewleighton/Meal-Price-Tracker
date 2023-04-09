@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+
+  postgres:
+
+    image: postgres:15.2
+    restart: always
+    ports:
+      - "${DATABASE_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - meal_price_tracker:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME} -h postgres"]
+      interval: 10s
+      retries: 5
+
+  app:
+    container_name: meal_price_tracker
+    build: .
+    command: python manage.py runserver 0.0.0.0:${APP_PORT:-8000}
+    ports:
+      - "${APP_PORT:-8000}:${APP_PORT:-8000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  migrations:
+    build: .
+    command: python manage.py migrate --noinput
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - postgres
+
+
+volumes:
+  meal_price_tracker:
